@@ -1,7 +1,0 @@
--- UP
-ALTER TABLE users
-ADD COLUMN user_phone VARCHAR(20) NOT NULL;
-
--- DOWN
-ALTER TABLE users
-DROP COUMN user_phone;

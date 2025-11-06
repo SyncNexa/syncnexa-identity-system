@@ -1,6 +1,11 @@
 import express from "express";
 import { validateRequest } from "../middlewares/validateRequest.middleware.js";
-import { createUser } from "../controllers/auth.controller.js";
+import {
+  createUser,
+  login,
+  logout,
+  refreshAccessToken,
+} from "../controllers/auth.controller.js";
 import { z } from "zod";
 
 const router = express.Router();
@@ -63,5 +68,12 @@ export const registerSchema = z.object({
 });
 
 router.post("/register", validateRequest(registerSchema), createUser);
+router.post("/verify-email");
+router.post("/login", login);
+router.post("/refresh-token", refreshAccessToken);
+router.post("/logout", logout);
+router.post("/forgot-password");
+router.post("/reset-password");
+// router.post("/verify-email");
 
 export default router;

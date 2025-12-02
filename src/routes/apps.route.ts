@@ -1,7 +1,4 @@
 import express from "express";
-import { validateRequest } from "../middlewares/validateRequest.middleware.js";
-import { createUser } from "../controllers/auth.controller.js";
-import { z } from "zod";
 import { authorizeRoles } from "../middlewares/role.middleware.js";
 
 const router = express.Router();

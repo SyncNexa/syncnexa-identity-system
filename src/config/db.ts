@@ -15,7 +15,7 @@ const pool: Pool = createPool({
           ca: readFileSync(resolve(cwd(), "ca.pem")),
         },
       }
-    : undefined),
+    : {}),
 });
 
 export default pool;

@@ -1,4 +1,4 @@
--- Up
+-- UP
 CREATE TABLE
     IF NOT EXISTS student_documents (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -28,7 +28,7 @@ CREATE TABLE
         FOREIGN KEY (document_id) REFERENCES student_documents (id) ON DELETE CASCADE
     );
 
--- Down
+-- DOWN
 DROP TABLE IF EXISTS student_document_verifications;
 
 DROP TABLE IF EXISTS student_documents;

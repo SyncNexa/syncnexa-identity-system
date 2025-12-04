@@ -1,4 +1,4 @@
--- Up
+-- UP
 CREATE TABLE
     IF NOT EXISTS student_cards (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -23,7 +23,7 @@ CREATE TABLE
         FOREIGN KEY (card_id) REFERENCES student_cards (id) ON DELETE CASCADE
     );
 
--- Down
+-- DOWN
 DROP TABLE IF EXISTS student_card_tokens;
 
 DROP TABLE IF EXISTS student_cards;

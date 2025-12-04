@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import chalk from "chalk";
 import { logger } from "../utils/logger.js";
+import { sendError } from "../utils/error.js";
 
 // export function errorHandler(
 //   err: any,
@@ -22,7 +23,7 @@ import { logger } from "../utils/logger.js";
 // }
 
 export function errorHandler(
-  err: Error,
+  err: any,
   req: Request,
   res: Response,
   _next: NextFunction
@@ -51,8 +52,33 @@ export function errorHandler(
   logger.error(`Error from ${route} - IP: ${ip} - ${message}\n${stack}`);
 
   // Generic response for users
-  res.status(500).json({
-    success: "failed",
-    message: "Internal Server Error",
-  });
+  // Infer a more accurate HTTP status code when possible
+  let status = 500;
+  const msg = message.toString();
+  const lower = msg.toLowerCase();
+
+  if (typeof err?.status === "number") {
+    status = err.status;
+  } else if (
+    lower.includes("unauthorized") ||
+    lower.includes("invalid token") ||
+    lower.includes("invalid credentials")
+  ) {
+    status = 401;
+  } else if (
+    lower.includes("not found") ||
+    lower.includes("does not exist") ||
+    lower.includes("not exist")
+  ) {
+    status = 404;
+  } else if (
+    lower.includes("missing") ||
+    lower.includes("required") ||
+    lower.includes("bad request")
+  ) {
+    status = 400;
+  }
+
+  // Use sendError helper for a consistent response shape
+  return sendError(status, msg, res);
 }

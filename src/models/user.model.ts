@@ -6,8 +6,10 @@ export async function createNewUser(user: any) {
   try {
     await client.beginTransaction();
 
+    // Insert user row. Columns names vary across migrations/code; this uses the codebase's expected column names.
     await client.query(
-      `INSERT INTO users (first_name, last_name, user_email, user_password, user_country, user_state, user_address, user_gender, user_phone) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO users (first_name, last_name, user_email, user_password, user_country, user_state, user_address, user_gender, user_phone, user_role)
+       VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         user.firstName,
         user.lastName,
@@ -18,6 +20,7 @@ export async function createNewUser(user: any) {
         user.address,
         user.gender,
         user.phone,
+        user.role || "student",
       ]
     );
 
@@ -28,8 +31,45 @@ export async function createNewUser(user: any) {
 
     await client.commit();
 
-    delete row[0]?.user_password;
-    return row[0];
+    const created = row[0];
+    if (!created) {
+      await client.rollback();
+      throw new Error("Failed to create user");
+    }
+
+    // If the new user is a student, create a students record within the same transaction
+    const role =
+      user.role || created.user_role || created.userRole || "student";
+    if (role === "student") {
+      // Require institution and matric_number for student records
+      const institution = user.institution || null;
+      const matric = user.matric_number || null;
+      if (!institution || !matric) {
+        // rollback and throw so caller can handle
+        await client.rollback();
+        throw new Error(
+          "Missing student information: institution and matric_number required for student role"
+        );
+      }
+
+      await client.query(
+        `INSERT INTO students (user_id, institution, matric_number, department, faculty, course, student_level, graduation_year)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          created.id,
+          institution,
+          matric,
+          user.department || null,
+          user.faculty || null,
+          user.course || null,
+          user.student_level || null,
+          user.graduation_year || null,
+        ]
+      );
+    }
+
+    delete created?.user_password;
+    return created;
   } catch (err) {
     client.rollback();
     console.log(err);

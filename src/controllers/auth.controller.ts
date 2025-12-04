@@ -1,10 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import { createNewUser } from "../models/user.model.js";
-import { sendSuccess } from "../utils/success.js";
+import { sendSuccess } from "../utils/response.js";
 import pool from "../config/db.js";
 import type { RowDataPacket } from "mysql2";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
 import { sendError } from "../utils/error.js";
+import { internalError } from "../utils/httpError.js";
 import bcrypt from "bcrypt";
 
 export async function createUser(
@@ -17,7 +18,7 @@ export async function createUser(
     if (result) {
       sendSuccess(201, "User created successfully!", res, result);
     } else {
-      throw new Error("Could not create account, please try again.");
+      throw internalError("Could not create account, please try again.");
     }
   } catch (err) {
     console.log(err);

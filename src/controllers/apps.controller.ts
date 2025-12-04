@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import * as appService from "../services/app.service.js";
-import { sendSuccess } from "../utils/success.js";
+import { sendSuccess } from "../utils/response.js";
+import { badRequest, unauthorized } from "../utils/httpError.js";
 
 export const registerApp = async (
   req: Request,
@@ -9,7 +10,7 @@ export const registerApp = async (
 ) => {
   try {
     const ownerId = req.user?.id as string | undefined; // from auth middleware
-    if (!ownerId) throw new Error("Unauthorized");
+    if (!ownerId) throw unauthorized("Unauthorized");
     const { name, description, website_url, callback_url, scopes } = req.body;
 
     const app = await appService.registerApp({
@@ -34,7 +35,7 @@ export const getMyApps = async (
 ) => {
   try {
     const ownerId = req.user?.id as string | undefined;
-    if (!ownerId) throw new Error("Unauthorized");
+    if (!ownerId) throw unauthorized("Unauthorized");
     const apps = await appService.getAppsByOwner(ownerId);
     return sendSuccess(200, "Apps retrieved successfully", res, apps);
   } catch (err) {
@@ -62,9 +63,9 @@ export const updateApp = async (
 ) => {
   try {
     const appId = req.params.id as string | undefined;
-    if (!appId) throw new Error("Missing app id");
+    if (!appId) throw badRequest("Missing app id");
     const ownerId = req.user?.id as string | undefined;
-    if (!ownerId) throw new Error("Unauthorized");
+    if (!ownerId) throw unauthorized("Unauthorized");
     const updates = req.body;
 
     const updated = await appService.updateApp(
@@ -85,9 +86,9 @@ export const rotateSecret = async (
 ) => {
   try {
     const appId = req.params.id as string | undefined;
-    if (!appId) throw new Error("Missing app id");
+    if (!appId) throw badRequest("Missing app id");
     const ownerId = req.user?.id as string | undefined;
-    if (!ownerId) throw new Error("Unauthorized");
+    if (!ownerId) throw unauthorized("Unauthorized");
 
     const newSecret = await appService.rotateSecret(appId, ownerId as string);
     return sendSuccess(
@@ -108,10 +109,9 @@ export const deleteApp = async (
 ) => {
   try {
     const appId = req.params.id as string | undefined;
-    if (!appId) throw new Error("Missing app id");
+    if (!appId) throw badRequest("Missing app id");
     const ownerId = req.user?.id as string | undefined;
-    if (!ownerId) throw new Error("Unauthorized");
-    if (!appId) throw new Error("App ID is required");
+    if (!ownerId) throw unauthorized("Unauthorized");
 
     await appService.deleteApp(appId, ownerId as string);
     return sendSuccess(200, "App deleted successfully.", res);

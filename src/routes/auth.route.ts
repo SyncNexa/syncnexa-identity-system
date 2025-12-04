@@ -68,12 +68,12 @@ export const registerSchema = z.object({
 });
 
 router.post("/register", validateRequest(registerSchema), createUser);
-router.post("/verify-email");
+// router.post("/verify-email");
 router.post("/login", login);
 router.post("/refresh-token", refreshAccessToken);
 router.post("/logout", logout);
-router.post("/forgot-password");
-router.post("/reset-password");
+// router.post("/forgot-password");
+// router.post("/reset-password");
 // router.post("/verify-email");
 
 export default router;

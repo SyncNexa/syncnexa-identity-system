@@ -10,3 +10,4 @@ CREATE TABLE
     );
 
 -- DOWN
+DROP TABLE IF EXISTS refresh_tokens;

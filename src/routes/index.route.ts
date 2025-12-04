@@ -1,5 +1,5 @@
 import express from "express";
-import { sendSuccess } from "../utils/success.js";
+import { sendSuccess } from "../utils/response.js";
 
 const router = express.Router();
 

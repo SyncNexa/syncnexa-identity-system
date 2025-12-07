@@ -1,4 +1,4 @@
--- Up
+-- UP
 CREATE TABLE
     IF NOT EXISTS institution_verification_requests (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -13,5 +13,5 @@ CREATE TABLE
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     );
 
--- Down
+-- DOWN
 DROP TABLE IF EXISTS institution_verification_requests;

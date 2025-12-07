@@ -1,4 +1,4 @@
--- Up
+-- UP
 CREATE TABLE
     IF NOT EXISTS academic_records (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -31,7 +31,7 @@ CREATE TABLE
         FOREIGN KEY (academic_record_id) REFERENCES academic_records (id) ON DELETE CASCADE
     );
 
--- Down
+-- DOWN
 DROP TABLE IF EXISTS transcripts;
 
 DROP TABLE IF EXISTS academic_records;

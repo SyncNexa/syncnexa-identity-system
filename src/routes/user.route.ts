@@ -27,9 +27,17 @@ router.get(
 // Institution verification requests
 import * as institutionController from "../controllers/institution.controller.js";
 
-router.post("/verification-requests", institutionController.createRequest);
+router.post(
+  "/verification-requests",
+  validateRequest(institutionValidator.createInstitutionVerificationSchema),
+  institutionController.createRequest
+);
 router.get("/verification-requests", institutionController.listRequests);
-router.patch("/verification-requests/:id", institutionController.updateRequest);
+router.patch(
+  "/verification-requests/:id",
+  validateRequest(institutionValidator.updateInstitutionVerificationSchema),
+  institutionController.updateRequest
+);
 
 // Student cards (digital)
 import * as studentCardController from "../controllers/studentCard.controller.js";
@@ -38,10 +46,26 @@ import { validateRequest } from "../middlewares/validateRequest.middleware.js";
 import studentValidator from "../validators/student.validator.js";
 import academicValidator from "../validators/academic.validator.js";
 import verificationValidator from "../validators/verification.validator.js";
+import shareableLinkValidator from "../validators/shareableLink.validator.js";
+import * as shareableLinkController from "../controllers/shareableLink.controller.js";
+import institutionValidator from "../validators/institution.validator.js";
+import studentCardValidator from "../validators/studentCard.validator.js";
 
-router.post("/cards", studentCardController.createCard);
-router.post("/cards/:id/token", studentCardController.issueToken);
-router.post("/cards/verify", studentCardController.verifyToken);
+router.post(
+  "/cards",
+  validateRequest(studentCardValidator.createCardSchema),
+  studentCardController.createCard
+);
+router.post(
+  "/cards/:id/token",
+  validateRequest(studentCardValidator.issueTokenSchema),
+  studentCardController.issueToken
+);
+router.post(
+  "/cards/verify",
+  validateRequest(studentCardValidator.verifyTokenSchema),
+  studentCardController.verifyToken
+);
 
 // Verification token APIs
 import * as verificationController from "../controllers/verification.controller.js";
@@ -61,6 +85,23 @@ router.post(
   verificationController.validateToken
 );
 router.get("/verification-tokens/:id/logs", verificationController.getLogs);
+
+// Shareable links (privacy controls)
+router.post(
+  "/shareable-links",
+  validateRequest(shareableLinkValidator.createShareableLinkSchema),
+  shareableLinkController.createLink
+);
+router.patch(
+  "/shareable-links/:id/revoke",
+  validateRequest(shareableLinkValidator.revokeShareableLinkSchema),
+  shareableLinkController.revokeLink
+);
+router.post(
+  "/shareable-links/validate",
+  validateRequest(shareableLinkValidator.validateShareableLinkSchema),
+  shareableLinkController.validateLink
+);
 
 // Portfolio routes
 import * as portfolioController from "../controllers/portfolio.controller.js";
@@ -94,6 +135,52 @@ router.get("/certificates", portfolioController.listCertificates);
 // CV generation
 import * as cvController from "../controllers/cv.controller.js";
 router.get("/cv", validateRequest(cvValidator.getCvSchema), cvController.getCv);
+
+// Session Management & MFA
+import * as sessionController from "../controllers/session.controller.js";
+import sessionValidator from "../validators/session.validator.js";
+
+router.post(
+  "/sessions",
+  validateRequest(sessionValidator.createSessionSchema),
+  sessionController.createSession
+);
+router.get("/sessions", sessionController.listActiveSessions);
+router.patch(
+  "/sessions/:id/revoke",
+  validateRequest(sessionValidator.revokeSessionSchema),
+  sessionController.revokeSession
+);
+router.post("/sessions/revoke-all", sessionController.revokeAllSessions);
+
+// TOTP MFA
+router.post("/mfa/totp/setup", sessionController.setupTotp);
+router.post(
+  "/mfa/totp/enable",
+  validateRequest(sessionValidator.enableTotpSchema),
+  sessionController.enableTotp
+);
+router.post("/mfa/totp/disable", sessionController.disableTotp);
+
+// Dashboard & Progress
+import * as dashboardController from "../controllers/dashboard.controller.js";
+import dashboardValidator from "../validators/dashboard.validator.js";
+
+router.get(
+  "/dashboard",
+  validateRequest(dashboardValidator.getDashboardSchema),
+  dashboardController.getDashboard
+);
+router.get(
+  "/dashboard/progress",
+  validateRequest(dashboardValidator.getDashboardSchema),
+  dashboardController.getProgress
+);
+router.get(
+  "/dashboard/suggestions",
+  validateRequest(dashboardValidator.getDashboardSchema),
+  dashboardController.getSuggestions
+);
 
 // Attach multer and validation to upload endpoints
 router.post(

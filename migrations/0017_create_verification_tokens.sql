@@ -1,4 +1,4 @@
--- Up
+-- UP
 CREATE TABLE
     IF NOT EXISTS verification_tokens (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -23,7 +23,7 @@ CREATE TABLE
         FOREIGN KEY (token_id) REFERENCES verification_tokens (id) ON DELETE SET NULL
     );
 
--- Down
+-- DOWN
 DROP TABLE IF EXISTS verification_logs;
 
 DROP TABLE IF EXISTS verification_tokens;

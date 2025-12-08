@@ -1,11 +1,11 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS verification_tokens (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
         token TEXT NOT NULL,
         scope VARCHAR(100) DEFAULT NULL,
-        issued_for BIGINT UNSIGNED DEFAULT NULL,
-        issued_by BIGINT UNSIGNED DEFAULT NULL,
+        issued_for CHAR(36) DEFAULT NULL,
+        issued_by CHAR(36) DEFAULT NULL,
         expires_at DATETIME NOT NULL,
         revoked TINYINT (1) DEFAULT 0,
         metadata JSON DEFAULT NULL,
@@ -14,8 +14,8 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS verification_logs (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        token_id BIGINT UNSIGNED DEFAULT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        token_id CHAR(36) DEFAULT NULL,
         verifier VARCHAR(255) DEFAULT NULL,
         action VARCHAR(50) NOT NULL,
         accessed_data JSON DEFAULT NULL,

@@ -8,6 +8,7 @@ export async function insertApp(payload: {
   callback_url?: string;
   owner_id: string;
   client_secret: string;
+  slug: string;
   scopes?: any;
 }) {
   const {
@@ -17,10 +18,11 @@ export async function insertApp(payload: {
     callback_url,
     owner_id,
     client_secret,
+    slug,
     scopes,
   } = payload;
-  const sql = `INSERT INTO apps (name, description, website_url, callback_url, owner_id, client_secret, client_id, scopes)
-    VALUES (?, ?, ?, ?, ?, ?, UUID(), ?)`;
+  const sql = `INSERT INTO apps (app_name, app_description, website_url, callback_url, owner_id, client_secret, client_id, slug, scopes)
+    VALUES (?, ?, ?, ?, ?, ?, UUID(), ?, ?)`;
   const params = [
     name,
     description,
@@ -28,6 +30,7 @@ export async function insertApp(payload: {
     callback_url,
     owner_id,
     client_secret,
+    slug,
     JSON.stringify(scopes || []),
   ];
   return pool.query(sql, params);
@@ -62,6 +65,14 @@ export async function findById(id: string) {
     [id]
   );
   return rows[0];
+}
+
+export async function findByIdAndOwner(id: string, ownerId: string) {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT * FROM apps WHERE id = ? AND owner_id = ?`,
+    [id, ownerId]
+  );
+  return rows;
 }
 
 export async function updateByIdAndOwner(
@@ -117,6 +128,7 @@ export default {
   findByOwner,
   findAvailable,
   findById,
+  findByIdAndOwner,
   updateByIdAndOwner,
   updateSecretByIdAndOwner,
   deleteByIdAndOwner,

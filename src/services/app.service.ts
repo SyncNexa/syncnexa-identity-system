@@ -2,9 +2,20 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import * as appModel from "../models/app.model.js";
 
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .slice(0, 100); // Limit to 100 chars
+}
+
 export async function registerApp(data: any) {
   const clientSecretRaw = crypto.randomBytes(32).toString("hex");
   const clientSecretHash = await bcrypt.hash(clientSecretRaw, 10);
+  const slug = generateSlug(data.name);
 
   try {
     await appModel.insertApp({
@@ -14,6 +25,7 @@ export async function registerApp(data: any) {
       callback_url: data.callback_url,
       owner_id: data.owner_id,
       client_secret: clientSecretHash,
+      slug: slug,
       scopes: data.scopes,
     });
 
@@ -30,6 +42,11 @@ export async function registerApp(data: any) {
 
 export async function getAppsByOwner(ownerId: string) {
   return appModel.findByOwner(ownerId);
+}
+
+export async function getAppById(appId: string, ownerId: string) {
+  const apps = await appModel.findByIdAndOwner(appId, ownerId);
+  return apps.length > 0 ? apps[0] : null;
 }
 
 export async function getAvailableApps() {
@@ -60,6 +77,7 @@ export async function deleteApp(appId: string, ownerId: string | undefined) {
 export default {
   registerApp,
   getAppsByOwner,
+  getAppById,
   getAvailableApps,
   updateApp,
   rotateSecret,

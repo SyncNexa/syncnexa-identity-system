@@ -2,10 +2,14 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import pool from "../config/db.js";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is not set");
+}
 
 export function generateAccessToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "15m" });
+  return jwt.sign(payload, JWT_SECRET as string, { expiresIn: "15m" });
 }
 
 export async function generateRefreshToken(userId: string): Promise<string> {

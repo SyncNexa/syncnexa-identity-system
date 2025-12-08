@@ -1,9 +1,9 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS app_grants (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id BIGINT UNSIGNED NOT NULL,
-        app_id BIGINT UNSIGNED NOT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        user_id CHAR(36) NOT NULL,
+        app_id CHAR(36) NOT NULL,
         scopes JSON DEFAULT NULL,
         access_token VARCHAR(255) UNIQUE,
         refresh_token VARCHAR(255) UNIQUE,
@@ -20,9 +20,9 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS authorization_codes (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id BIGINT UNSIGNED NOT NULL,
-        app_id BIGINT UNSIGNED NOT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        user_id CHAR(36) NOT NULL,
+        app_id CHAR(36) NOT NULL,
         code VARCHAR(255) UNIQUE NOT NULL,
         scopes JSON DEFAULT NULL,
         redirect_uri VARCHAR(1024),

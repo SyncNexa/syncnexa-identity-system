@@ -1,8 +1,8 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS profile_progress (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id BIGINT UNSIGNED NOT NULL UNIQUE,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        user_id CHAR(36) NOT NULL UNIQUE,
         documents_count INT UNSIGNED DEFAULT 0,
         documents_verified INT UNSIGNED DEFAULT 0,
         academics_count INT UNSIGNED DEFAULT 0,

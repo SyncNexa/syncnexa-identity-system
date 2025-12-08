@@ -1,0 +1,87 @@
+[
+  {
+    "title": "Getting Started",
+    "items": [
+      {
+        "label": "Overview",
+        "path": "getting-started/overview"
+      },
+      {
+        "label": "App Registration",
+        "path": "getting-started/app-registration"
+      },
+      {
+        "label": "App Management",
+        "path": "getting-started/app-management"
+      },
+      {
+        "label": "Installation",
+        "path": "getting-started/installation"
+      },
+      {
+        "label": "Quick Start",
+        "path": "getting-started/quick-start"
+      }
+    ]
+  },
+  {
+    "title": "Authentication",
+    "items": [
+      {
+        "label": "OAuth 2.0 Flow",
+        "path": "auth/oauth-flow"
+      },
+      {
+        "label": "Token Management",
+        "path": "auth/token-management"
+      },
+      {
+        "label": "Scopes",
+        "path": "auth/scopes"
+      }
+    ]
+  },
+  {
+    "title": "API Reference",
+    "items": [
+      {
+        "label": "Authorize",
+        "path": "api/authorize"
+      },
+      {
+        "label": "Token Exchange",
+        "path": "api/token"
+      },
+      {
+        "label": "User Profile",
+        "path": "api/user-profile"
+      }
+    ]
+  },
+  {
+    "title": "Examples",
+    "items": [
+      {
+        "label": "Node.js",
+        "path": "examples/nodejs"
+      },
+      {
+        "label": "React",
+        "path": "examples/react"
+      },
+      {
+        "label": "Python",
+        "path": "examples/python"
+      }
+    ]
+  },
+  {
+    "title": "FAQ",
+    "items": [
+      {
+        "label": "Common Questions",
+        "path": "faq/common-questions"
+      }
+    ]
+  }
+]

@@ -1,11 +1,11 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS shareable_links (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id BIGINT UNSIGNED NOT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        user_id CHAR(36) NOT NULL,
         token VARCHAR(255) NOT NULL UNIQUE,
         resource_type VARCHAR(100) NOT NULL,
-        resource_id BIGINT UNSIGNED NULL,
+        resource_id CHAR(36) NULL,
         scope JSON DEFAULT NULL,
         expires_at DATETIME NULL,
         max_uses INT UNSIGNED NULL,

@@ -1,20 +1,24 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
+import bcrypt from "bcrypt";
 
 export async function createNewUser(user: any) {
   const client = await pool.getConnection();
   try {
     await client.beginTransaction();
 
-    // Insert user row. Columns names vary across migrations/code; this uses the codebase's expected column names.
+    // Hash password before storing
+    const passwordHash = await bcrypt.hash(user.password, 10);
+
+    // Insert user row with correct column names from schema
     await client.query(
-      `INSERT INTO users (first_name, last_name, user_email, user_password, user_country, user_state, user_address, user_gender, user_phone, user_role)
+      `INSERT INTO users (first_name, last_name, email, password_hash, user_country, user_state, user_address, gender, phone, user_role)
        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         user.firstName,
         user.lastName,
         user.email,
-        user.password,
+        passwordHash,
         user.country,
         user.state,
         user.address,
@@ -25,7 +29,7 @@ export async function createNewUser(user: any) {
     );
 
     const [row] = await client.query<RowDataPacket[]>(
-      `SELECT * FROM users WHERE user_email = ? OR user_phone = ?`,
+      `SELECT * FROM users WHERE email = ? OR phone = ?`,
       [user.email, user.phone]
     );
 
@@ -68,7 +72,7 @@ export async function createNewUser(user: any) {
       );
     }
 
-    delete created?.user_password;
+    delete created?.password_hash;
     return created;
   } catch (err) {
     client.rollback();
@@ -80,7 +84,7 @@ export async function createNewUser(user: any) {
 export async function selectUserByEmail(email: string) {
   try {
     const [row] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM users WHERE user_email = ?`,
+      `SELECT * FROM users WHERE email = ?`,
       [email]
     );
     return row[0];
@@ -114,7 +118,7 @@ export async function markUserVerified(id: string) {
     if (row.length == 0) {
       return null;
     }
-    await client.query(`UPDATE users SET email_verified = TRUE WHERE id = ?`, [
+    await client.query(`UPDATE users SET is_verified = TRUE WHERE id = ?`, [
       id,
     ]);
 

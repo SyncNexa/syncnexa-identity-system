@@ -59,6 +59,17 @@ function parseMigrationFile(filePath: string): { up: string; down: string } {
   };
 }
 
+async function runStatements(sql: string): Promise<void> {
+  const statements = sql
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+
+  for (const stmt of statements) {
+    await pool.query(stmt);
+  }
+}
+
 async function migrate(direction: "up" | "down" = "up"): Promise<void> {
   await ensureMigrationsTable();
 
@@ -77,11 +88,11 @@ async function migrate(direction: "up" | "down" = "up"): Promise<void> {
     try {
       if (direction === "up") {
         console.log(`Running migration: ${migrationFile}`);
-        await pool.query(up);
+        await runStatements(up);
         await markMigrationAsExecuted(migrationFile);
       } else {
         console.log(`Rolling back migration: ${migrationFile}`);
-        await pool.query(down);
+        await runStatements(down);
         await removeMigrationRecord(migrationFile);
       }
     } catch (error) {

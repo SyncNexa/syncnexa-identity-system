@@ -1,8 +1,8 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS student_documents (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id BIGINT UNSIGNED NOT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        user_id CHAR(36) NOT NULL,
         doc_type VARCHAR(50) NOT NULL,
         filename VARCHAR(255) NOT NULL,
         filepath VARCHAR(1024) DEFAULT NULL,
@@ -17,10 +17,10 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS student_document_verifications (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        document_id BIGINT UNSIGNED NOT NULL,
-        reviewer_id BIGINT UNSIGNED DEFAULT NULL,
-        status ENUM ('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        document_id CHAR(36) NOT NULL,
+        reviewer_id CHAR(36) DEFAULT NULL,
+        document_status ENUM ('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
         notes TEXT DEFAULT NULL,
         metadata JSON DEFAULT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

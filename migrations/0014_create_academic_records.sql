@@ -1,8 +1,8 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS academic_records (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id BIGINT UNSIGNED NOT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        user_id CHAR(36) NOT NULL,
         institution VARCHAR(255) NOT NULL,
         program VARCHAR(255) DEFAULT NULL,
         matric_number VARCHAR(100) DEFAULT NULL,
@@ -18,8 +18,8 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS transcripts (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        academic_record_id BIGINT UNSIGNED NOT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        academic_record_id CHAR(36) NOT NULL,
         filename VARCHAR(255) NOT NULL,
         filepath VARCHAR(1024) DEFAULT NULL,
         mime_type VARCHAR(100) DEFAULT NULL,

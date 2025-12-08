@@ -1,8 +1,8 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS student_projects (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id BIGINT UNSIGNED NOT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        user_id CHAR(36) NOT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT DEFAULT NULL,
         links JSON DEFAULT NULL,
@@ -14,8 +14,8 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS student_certificates (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_id BIGINT UNSIGNED NOT NULL,
+        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        user_id CHAR(36) NOT NULL,
         issuer VARCHAR(255) NOT NULL,
         title VARCHAR(255) NOT NULL,
         issue_date DATE DEFAULT NULL,

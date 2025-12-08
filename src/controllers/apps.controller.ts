@@ -56,6 +56,25 @@ export const getAvailableApps = async (
   }
 };
 
+export const getAppById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const appId = req.params.id as string;
+    const ownerId = req.user?.id as string;
+    if (!ownerId) throw unauthorized("Unauthorized");
+
+    const app = await appService.getAppById(appId, ownerId);
+    if (!app) throw badRequest("App not found or you don't have access");
+
+    return sendSuccess(200, "App retrieved successfully", res, app);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const updateApp = async (
   req: Request,
   res: Response,
@@ -85,12 +104,11 @@ export const rotateSecret = async (
   next: NextFunction
 ) => {
   try {
-    const appId = req.params.id as string | undefined;
-    if (!appId) throw badRequest("Missing app id");
+    const { app_id } = req.body;
     const ownerId = req.user?.id as string | undefined;
     if (!ownerId) throw unauthorized("Unauthorized");
 
-    const newSecret = await appService.rotateSecret(appId, ownerId as string);
+    const newSecret = await appService.rotateSecret(app_id, ownerId);
     return sendSuccess(
       200,
       "Client secret rotated successfully.",

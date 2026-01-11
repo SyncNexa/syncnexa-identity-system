@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS verifications (
-        id CHAR(36) PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         verified_by VARCHAR(255),
         verification_type ENUM ('institution', 'system', 'external') NOT NULL,

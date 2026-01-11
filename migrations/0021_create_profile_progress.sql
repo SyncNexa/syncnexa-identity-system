@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS profile_progress (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL UNIQUE,
         documents_count INT UNSIGNED DEFAULT 0,
         documents_verified INT UNSIGNED DEFAULT 0,

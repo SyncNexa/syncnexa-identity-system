@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { generateUUID } from "../utils/uuid.js";
 import type { RowDataPacket } from "mysql2";
 
 export async function insertApp(payload: {
@@ -21,15 +22,19 @@ export async function insertApp(payload: {
     slug,
     scopes,
   } = payload;
-  const sql = `INSERT INTO apps (app_name, app_description, website_url, callback_url, owner_id, client_secret, client_id, slug, scopes)
-    VALUES (?, ?, ?, ?, ?, ?, UUID(), ?, ?)`;
+  const id = generateUUID();
+  const clientId = generateUUID();
+  const sql = `INSERT INTO apps (id, app_name, app_description, website_url, callback_url, owner_id, client_secret, client_id, slug, scopes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   const params = [
+    id,
     name,
     description,
     website_url,
     callback_url,
     owner_id,
     client_secret,
+    clientId,
     slug,
     JSON.stringify(scopes || []),
   ];

@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS institution_verification_requests (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         institution VARCHAR(255) NOT NULL,
         contact_email VARCHAR(255) DEFAULT NULL,

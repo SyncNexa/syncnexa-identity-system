@@ -1,5 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
+import { generateUUID } from "../utils/uuid.js";
 
 export async function insertDocument(doc: {
   user_id: number | string;
@@ -11,9 +12,11 @@ export async function insertDocument(doc: {
   meta?: any;
 }) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO student_documents (user_id, doc_type, filename, filepath, mime_type, file_size, meta) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO student_documents (id, user_id, doc_type, filename, filepath, mime_type, file_size, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        id,
         doc.user_id,
         doc.doc_type,
         doc.filename,
@@ -23,14 +26,17 @@ export async function insertDocument(doc: {
         doc.meta ? JSON.stringify(doc.meta) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM student_documents WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] || null;
+    return {
+      id,
+      user_id: doc.user_id as any,
+      doc_type: doc.doc_type,
+      filename: doc.filename,
+      filepath: doc.filepath || null,
+      mime_type: doc.mime_type || null,
+      file_size: doc.file_size || null,
+      meta: doc.meta || null,
+      is_verified: 0,
+    } as any;
   } catch (err) {
     console.error(err);
     return null;
@@ -115,9 +121,11 @@ export async function createDocumentVerification(
   }
 ) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO student_document_verifications (document_id, reviewer_id, status, notes, metadata) VALUES (?, ?, ?, ?, ?)`,
+    const verId = generateUUID();
+    await pool.query(
+      `INSERT INTO student_document_verifications (id, document_id, reviewer_id, status, notes, metadata) VALUES (?, ?, ?, ?, ?, ?)`,
       [
+        verId,
         docId,
         payload.reviewer_id || null,
         payload.status || "pending",
@@ -125,17 +133,14 @@ export async function createDocumentVerification(
         payload.metadata ? JSON.stringify(payload.metadata) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT * FROM student_document_verifications WHERE id = ?`,
-      [insertId]
+      [verId]
     );
     // update document record with verification_id and is_verified if approved/rejected
     await pool.query(
       `UPDATE student_documents SET verification_id = ? WHERE id = ?`,
-      [insertId, docId]
+      [verId, docId]
     );
     return rows[0] || null;
   } catch (err) {

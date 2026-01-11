@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS refresh_tokens (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         token VARCHAR(255) NOT NULL,
         expires_at TIMESTAMP NOT NULL,

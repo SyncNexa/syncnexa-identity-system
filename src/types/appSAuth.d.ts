@@ -1,12 +1,12 @@
 /**
- * SAuth (Student Authentication) - OAuth 2.0 Authorization Code Flow
+ * SAuth (Student Authentication) - SAuth 2.0 Authorization Code Flow
  * Type definitions for app grants and authorization codes
  */
 
-export interface AppGrant {
-  id: number;
-  user_id: number;
-  app_id: number;
+interface AppGrant {
+  id: string;
+  user_id: string;
+  app_id: string;
   scopes: any;
   access_token: string;
   refresh_token: string | null;
@@ -16,10 +16,10 @@ export interface AppGrant {
   updated_at: string;
 }
 
-export interface AuthorizationCode {
-  id: number;
-  user_id: number;
-  app_id: number;
+interface AuthorizationCode {
+  id: string;
+  user_id: string;
+  app_id: string;
   code: string;
   scopes: any;
   redirect_uri: string | null;

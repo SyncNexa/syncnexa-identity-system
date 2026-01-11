@@ -1,20 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
-
-export interface ShareableLink {
-  id: number;
-  user_id: number;
-  token: string;
-  resource_type: string;
-  resource_id: number | null;
-  scope: any;
-  expires_at: string | null;
-  max_uses: number | null;
-  uses_count: number;
-  is_revoked: number;
-  created_at: string;
-  updated_at: string;
-}
+import { generateUUID } from "../utils/uuid.js";
 
 export async function createLink(payload: {
   user_id: number | string;
@@ -29,29 +15,36 @@ export async function createLink(payload: {
   const expiresAt = payload.expires_at || null;
   const maxUses = payload.max_uses ?? null;
   const resourceId = payload.resource_id ?? null;
-  const values = [
-    payload.user_id,
-    payload.token,
-    payload.resource_type,
-    resourceId,
-    scopeJson,
-    expiresAt,
-    maxUses,
-  ];
+  const id = generateUUID();
   try {
-    const [result] = await pool.query(
-      `INSERT INTO shareable_links (user_id, token, resource_type, resource_id, scope, expires_at, max_uses)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      values
+    await pool.query(
+      `INSERT INTO shareable_links (id, user_id, token, resource_type, resource_id, scope, expires_at, max_uses)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        payload.user_id,
+        payload.token,
+        payload.resource_type,
+        resourceId,
+        scopeJson,
+        expiresAt,
+        maxUses,
+      ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM shareable_links WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] as ShareableLink;
+    return {
+      id: id,
+      user_id: payload.user_id as string,
+      token: payload.token,
+      resource_type: payload.resource_type,
+      resource_id: resourceId as string | null,
+      scope: payload.scope || null,
+      expires_at: expiresAt || null,
+      max_uses: maxUses || null,
+      uses_count: 0,
+      is_revoked: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as ShareableLink;
   } catch (err) {
     console.error(err);
     return null;

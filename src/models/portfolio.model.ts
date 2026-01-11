@@ -1,5 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
+import { generateUUID } from "../utils/uuid.js";
 
 export async function insertProject(payload: {
   user_id: number | string;
@@ -9,9 +10,11 @@ export async function insertProject(payload: {
   attachments?: any;
 }) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO student_projects (user_id, title, description, links, attachments) VALUES (?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO student_projects (id, user_id, title, description, links, attachments) VALUES (?, ?, ?, ?, ?, ?)`,
       [
+        id,
         payload.user_id,
         payload.title,
         payload.description || null,
@@ -19,14 +22,14 @@ export async function insertProject(payload: {
         payload.attachments ? JSON.stringify(payload.attachments) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM student_projects WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] || null;
+    return {
+      id,
+      user_id: payload.user_id as any,
+      title: payload.title,
+      description: payload.description || null,
+      links: payload.links || null,
+      attachments: payload.attachments || null,
+    } as any;
   } catch (err) {
     console.error(err);
     return null;
@@ -92,9 +95,11 @@ export async function insertCertificate(payload: {
   metadata?: any;
 }) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO student_certificates (user_id, issuer, title, issue_date, file_path, metadata) VALUES (?, ?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO student_certificates (id, user_id, issuer, title, issue_date, file_path, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
+        id,
         payload.user_id,
         payload.issuer,
         payload.title,
@@ -103,14 +108,15 @@ export async function insertCertificate(payload: {
         payload.metadata ? JSON.stringify(payload.metadata) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM student_certificates WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] || null;
+    return {
+      id,
+      user_id: payload.user_id as any,
+      issuer: payload.issuer,
+      title: payload.title,
+      issue_date: payload.issue_date || null,
+      file_path: payload.file_path || null,
+      metadata: payload.metadata || null,
+    } as any;
   } catch (err) {
     console.error(err);
     return null;

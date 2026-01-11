@@ -1,5 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
+import { generateUUID } from "../utils/uuid.js";
 
 export async function createRequest(payload: {
   user_id: number | string;
@@ -9,9 +10,11 @@ export async function createRequest(payload: {
   payload?: any;
 }) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO institution_verification_requests (user_id, institution, contact_email, contact_phone, payload) VALUES (?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO institution_verification_requests (id, user_id, institution, contact_email, contact_phone, payload) VALUES (?, ?, ?, ?, ?, ?)`,
       [
+        id,
         payload.user_id,
         payload.institution,
         payload.contact_email || null,
@@ -19,14 +22,15 @@ export async function createRequest(payload: {
         payload.payload ? JSON.stringify(payload.payload) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM institution_verification_requests WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] || null;
+    return {
+      id,
+      user_id: payload.user_id as any,
+      institution: payload.institution,
+      contact_email: payload.contact_email || null,
+      contact_phone: payload.contact_phone || null,
+      payload: payload.payload || null,
+      request_status: "pending",
+    } as any;
   } catch (err) {
     console.error(err);
     return null;

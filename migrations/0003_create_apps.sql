@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS apps (
-        id CHAR(36) PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) PRIMARY KEY,
         app_name VARCHAR(100) NOT NULL,
         slug VARCHAR(100) UNIQUE NOT NULL,
         app_description TEXT,

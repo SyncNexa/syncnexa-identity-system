@@ -1,23 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
-
-export interface ProfileProgress {
-  id: number;
-  user_id: number;
-  documents_count: number;
-  documents_verified: number;
-  academics_count: number;
-  transcripts_count: number;
-  institution_verifications_count: number;
-  institution_verified: number;
-  projects_count: number;
-  certificates_count: number;
-  certificates_verified: number;
-  has_student_card: number;
-  has_mfa_enabled: number;
-  profile_completion_percent: number;
-  last_updated: string;
-}
+import { generateUUID } from "../utils/uuid.js";
 
 export async function getOrCreateProgress(user_id: number | string) {
   try {
@@ -28,15 +11,30 @@ export async function getOrCreateProgress(user_id: number | string) {
     if (rows && rows.length > 0) {
       return rows[0] as ProfileProgress;
     }
-    // Create new record
-    await pool.query(`INSERT INTO profile_progress (user_id) VALUES (?)`, [
-      user_id,
-    ]);
-    const [newRows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM profile_progress WHERE user_id = ?`,
-      [user_id]
+    // Create new record with app-generated id
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO profile_progress (id, user_id) VALUES (?, ?)`,
+      [id, user_id]
     );
-    return (newRows && newRows[0]) as ProfileProgress;
+    // Return minimal default values without extra SELECT
+    return {
+      id,
+      user_id: user_id as string,
+      documents_count: 0,
+      documents_verified: 0,
+      academics_count: 0,
+      transcripts_count: 0,
+      institution_verifications_count: 0,
+      institution_verified: 0,
+      projects_count: 0,
+      certificates_count: 0,
+      certificates_verified: 0,
+      has_student_card: 0,
+      has_mfa_enabled: 0,
+      profile_completion_percent: 0,
+      last_updated: new Date().toISOString(),
+    } as unknown as ProfileProgress;
   } catch (err) {
     console.error(err);
     return null;

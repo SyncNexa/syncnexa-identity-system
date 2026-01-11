@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import * as cvService from "../services/cv.service.js";
 import { sendError } from "../utils/error.js";
+import puppeteer from "puppeteer";
 
 export async function getCv(req: Request, res: Response) {
   try {
@@ -17,10 +18,6 @@ export async function getCv(req: Request, res: Response) {
 
     if (wantsPdf) {
       try {
-        const puppeteerModule = await import("puppeteer");
-        const puppeteer =
-          (puppeteerModule && (puppeteerModule as any).default) ||
-          puppeteerModule;
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: "networkidle0" });

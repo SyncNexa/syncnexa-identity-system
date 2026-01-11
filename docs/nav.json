@@ -25,6 +25,31 @@
     ]
   },
   {
+    "title": "API Flows",
+    "items": [
+      {
+        "label": "Authentication Flow",
+        "path": "flows/authentication"
+      },
+      {
+        "label": "User Management Flow",
+        "path": "flows/user-management"
+      },
+      {
+        "label": "App Management Flow",
+        "path": "flows/app-management"
+      },
+      {
+        "label": "OAuth 2.0 / SAuth Flow",
+        "path": "flows/oauth-flow"
+      },
+      {
+        "label": "Dashboard Flow",
+        "path": "flows/dashboard"
+      }
+    ]
+  },
+  {
     "title": "Authentication",
     "items": [
       {

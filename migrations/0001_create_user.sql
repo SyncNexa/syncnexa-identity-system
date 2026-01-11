@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS users (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
         email VARCHAR(150) NOT NULL UNIQUE,

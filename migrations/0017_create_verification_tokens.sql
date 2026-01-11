@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS verification_tokens (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         token TEXT NOT NULL,
         scope VARCHAR(100) DEFAULT NULL,
         issued_for CHAR(36) DEFAULT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS verification_logs (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         token_id CHAR(36) DEFAULT NULL,
         verifier VARCHAR(255) DEFAULT NULL,
         action VARCHAR(50) NOT NULL,

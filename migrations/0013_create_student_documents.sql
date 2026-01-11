@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS student_documents (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         doc_type VARCHAR(50) NOT NULL,
         filename VARCHAR(255) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS student_document_verifications (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         document_id CHAR(36) NOT NULL,
         reviewer_id CHAR(36) DEFAULT NULL,
         document_status ENUM ('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',

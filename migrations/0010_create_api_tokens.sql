@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS api_tokens (
-        id CHAR(36) PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) PRIMARY KEY,
         app_id CHAR(36) NOT NULL,
         token VARCHAR(255) UNIQUE NOT NULL,
         expires_at TIMESTAMP NULL,

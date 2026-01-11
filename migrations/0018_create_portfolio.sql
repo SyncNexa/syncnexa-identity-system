@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS student_projects (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT DEFAULT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS student_certificates (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         issuer VARCHAR(255) NOT NULL,
         title VARCHAR(255) NOT NULL,

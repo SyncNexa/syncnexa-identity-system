@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS student_cards (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         card_uuid VARCHAR(100) NOT NULL UNIQUE,
         meta JSON DEFAULT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS student_card_tokens (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         card_id CHAR(36) NOT NULL,
         token TEXT NOT NULL,
         expires_at DATETIME NOT NULL,

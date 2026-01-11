@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS student_achievements (
-        id CHAR(36) PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         title VARCHAR(255) NOT NULL,
         archievement_description TEXT,

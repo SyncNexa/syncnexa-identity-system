@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS academic_records (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         institution VARCHAR(255) NOT NULL,
         program VARCHAR(255) DEFAULT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS transcripts (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         academic_record_id CHAR(36) NOT NULL,
         filename VARCHAR(255) NOT NULL,
         filepath VARCHAR(1024) DEFAULT NULL,

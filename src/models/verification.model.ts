@@ -1,5 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
+import { generateUUID } from "../utils/uuid.js";
 
 export async function storeToken(payload: {
   token: string;
@@ -10,9 +11,11 @@ export async function storeToken(payload: {
   metadata?: any;
 }) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO verification_tokens (token, scope, issued_for, issued_by, expires_at, metadata) VALUES (?, ?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO verification_tokens (id, token, scope, issued_for, issued_by, expires_at, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
+        id,
         payload.token,
         payload.scope || null,
         payload.issued_for || null,
@@ -21,14 +24,17 @@ export async function storeToken(payload: {
         payload.metadata ? JSON.stringify(payload.metadata) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM verification_tokens WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] || null;
+    return {
+      id,
+      token: payload.token,
+      scope: payload.scope || null,
+      issued_for: payload.issued_for || null,
+      issued_by: payload.issued_by || null,
+      expires_at: payload.expires_at,
+      revoked: 0,
+      metadata: payload.metadata || null,
+      created_at: new Date().toISOString(),
+    } as any;
   } catch (err) {
     console.error(err);
     return null;
@@ -72,23 +78,25 @@ export async function logVerification(
   accessedData?: any
 ) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO verification_logs (token_id, verifier, action, accessed_data) VALUES (?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO verification_logs (id, token_id, verifier, action, accessed_data) VALUES (?, ?, ?, ?, ?)`,
       [
+        id,
         tokenId || null,
         verifier || null,
         action,
         accessedData ? JSON.stringify(accessedData) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM verification_logs WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] || null;
+    return {
+      id,
+      token_id: tokenId || null,
+      verifier: verifier || null,
+      action,
+      accessed_data: accessedData || null,
+      created_at: new Date().toISOString(),
+    } as any;
   } catch (err) {
     console.error(err);
     return null;

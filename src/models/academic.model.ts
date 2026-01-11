@@ -1,5 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
+import { generateUUID } from "../utils/uuid.js";
 
 export async function insertAcademicRecord(rec: {
   user_id: number | string;
@@ -13,9 +14,11 @@ export async function insertAcademicRecord(rec: {
   meta?: any;
 }) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO academic_records (user_id, institution, program, matric_number, start_date, end_date, degree, gpa, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO academic_records (id, user_id, institution, program, matric_number, start_date, end_date, degree, gpa, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        id,
         rec.user_id,
         rec.institution,
         rec.program || null,
@@ -27,14 +30,18 @@ export async function insertAcademicRecord(rec: {
         rec.meta ? JSON.stringify(rec.meta) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM academic_records WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] || null;
+    return {
+      id,
+      user_id: rec.user_id as any,
+      institution: rec.institution,
+      program: rec.program || null,
+      matric_number: rec.matric_number || null,
+      start_date: rec.start_date || null,
+      end_date: rec.end_date || null,
+      degree: rec.degree || null,
+      gpa: rec.gpa || null,
+      meta: rec.meta || null,
+    } as any;
   } catch (err) {
     console.error(err);
     return null;
@@ -100,9 +107,11 @@ export async function insertTranscript(payload: {
   metadata?: any;
 }) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO transcripts (academic_record_id, filename, filepath, mime_type, file_size, metadata) VALUES (?, ?, ?, ?, ?, ?)`,
+    const tId = generateUUID();
+    await pool.query(
+      `INSERT INTO transcripts (id, academic_record_id, filename, filepath, mime_type, file_size, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
+        tId,
         payload.academic_record_id,
         payload.filename,
         payload.filepath || null,
@@ -111,14 +120,15 @@ export async function insertTranscript(payload: {
         payload.metadata ? JSON.stringify(payload.metadata) : null,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM transcripts WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] || null;
+    return {
+      id: tId,
+      academic_record_id: payload.academic_record_id as any,
+      filename: payload.filename,
+      filepath: payload.filepath || null,
+      mime_type: payload.mime_type || null,
+      file_size: payload.file_size || null,
+      metadata: payload.metadata || null,
+    } as any;
   } catch (err) {
     console.error(err);
     return null;

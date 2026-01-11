@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS app_grants (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         app_id CHAR(36) NOT NULL,
         scopes JSON DEFAULT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS authorization_codes (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         app_id CHAR(36) NOT NULL,
         code VARCHAR(255) UNIQUE NOT NULL,

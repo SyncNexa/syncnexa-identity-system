@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS student_experiences (
-        id CHAR(36) PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         role_title VARCHAR(255),
         organization VARCHAR(255),

@@ -1,6 +1,7 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
 import bcrypt from "bcrypt";
+import { generateUUID } from "../utils/uuid.js";
 
 export async function createNewUser(user: any) {
   const client = await pool.getConnection();
@@ -11,10 +12,12 @@ export async function createNewUser(user: any) {
     const passwordHash = await bcrypt.hash(user.password, 10);
 
     // Insert user row with correct column names from schema
+    const userId = generateUUID();
     await client.query(
-      `INSERT INTO users (first_name, last_name, email, password_hash, user_country, user_state, user_address, gender, phone, user_role)
-       VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO users (id, first_name, last_name, email, password_hash, user_country, user_state, user_address, gender, phone, user_role)
+       VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        userId,
         user.firstName,
         user.lastName,
         user.email,
@@ -28,22 +31,23 @@ export async function createNewUser(user: any) {
       ]
     );
 
-    const [row] = await client.query<RowDataPacket[]>(
-      `SELECT * FROM users WHERE email = ? OR phone = ?`,
-      [user.email, user.phone]
-    );
-
-    await client.commit();
-
-    const created = row[0];
-    if (!created) {
-      await client.rollback();
-      throw new Error("Failed to create user");
-    }
+    const created = {
+      id: userId,
+      first_name: user.firstName,
+      last_name: user.lastName,
+      email: user.email,
+      user_country: user.country,
+      user_state: user.state,
+      user_address: user.address,
+      gender: user.gender,
+      phone: user.phone,
+      user_role: user.role || "student",
+      is_verified: false,
+      account_status: "active",
+    } as any;
 
     // If the new user is a student, create a students record within the same transaction
-    const role =
-      user.role || created.user_role || created.userRole || "student";
+    const role = user.role || created.user_role || "student";
     if (role === "student") {
       // Require institution and matric_number for student records
       const institution = user.institution || null;
@@ -60,7 +64,7 @@ export async function createNewUser(user: any) {
         `INSERT INTO students (user_id, institution, matric_number, department, faculty, course, student_level, graduation_year)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          created.id,
+          userId,
           institution,
           matric,
           user.department || null,
@@ -72,7 +76,7 @@ export async function createNewUser(user: any) {
       );
     }
 
-    delete created?.password_hash;
+    await client.commit();
     return created;
   } catch (err) {
     client.rollback();

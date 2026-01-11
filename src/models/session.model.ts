@@ -1,17 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
-
-export interface UserSession {
-  id: number;
-  user_id: number;
-  session_token: string;
-  ip_address: string | null;
-  user_agent: string | null;
-  is_active: number;
-  last_activity: string;
-  expires_at: string;
-  created_at: string;
-}
+import { generateUUID } from "../utils/uuid.js";
 
 export async function createSession(payload: {
   user_id: number | string;
@@ -21,10 +10,12 @@ export async function createSession(payload: {
   expires_at: string;
 }) {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO user_sessions (user_id, session_token, ip_address, user_agent, expires_at)
-       VALUES (?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO user_sessions (id, user_id, session_token, ip_address, user_agent, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
+        id,
         payload.user_id,
         payload.session_token,
         payload.ip_address || null,
@@ -32,14 +23,17 @@ export async function createSession(payload: {
         payload.expires_at,
       ]
     );
-    // @ts-ignore
-    const insertId = result?.insertId;
-    if (!insertId) return null;
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM user_sessions WHERE id = ?`,
-      [insertId]
-    );
-    return rows[0] as UserSession;
+    return {
+      id: id,
+      user_id: payload.user_id as string,
+      session_token: payload.session_token,
+      ip_address: payload.ip_address || null,
+      user_agent: payload.user_agent || null,
+      is_active: 1,
+      last_activity: new Date().toISOString(),
+      expires_at: payload.expires_at,
+      created_at: new Date().toISOString(),
+    } as UserSession;
   } catch (err) {
     console.error(err);
     return null;

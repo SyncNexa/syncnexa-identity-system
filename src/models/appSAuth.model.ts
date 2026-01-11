@@ -1,6 +1,6 @@
 import type { RowDataPacket } from "mysql2";
-import type { AppGrant, AuthorizationCode } from "../types/appSAuth.js";
 import pool from "../config/db.js";
+import { generateUUID } from "../utils/uuid.js";
 
 // App Grant operations
 export async function createGrant(payload: {
@@ -13,10 +13,12 @@ export async function createGrant(payload: {
 }) {
   try {
     const scopesJson = payload.scopes ? JSON.stringify(payload.scopes) : null;
-    const [result] = await pool.query(
-      `INSERT INTO app_grants (user_id, app_id, scopes, access_token, refresh_token, token_expires_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO app_grants (id, user_id, app_id, scopes, access_token, refresh_token, token_expires_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
+        id,
         payload.user_id,
         payload.app_id,
         scopesJson,
@@ -25,10 +27,18 @@ export async function createGrant(payload: {
         payload.token_expires_at || null,
       ]
     );
-    // @ts-ignore
-    const id = result?.insertId;
-    if (!id) return null;
-    return await getGrantById(id);
+    return {
+      id,
+      user_id: payload.user_id as any,
+      app_id: payload.app_id as any,
+      scopes: payload.scopes || null,
+      access_token: payload.access_token,
+      refresh_token: payload.refresh_token || null,
+      token_expires_at: payload.token_expires_at || null,
+      is_revoked: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as any;
   } catch (err) {
     console.error(err);
     return null;
@@ -99,10 +109,12 @@ export async function createAuthorizationCode(payload: {
 }) {
   try {
     const scopesJson = payload.scopes ? JSON.stringify(payload.scopes) : null;
-    const [result] = await pool.query(
-      `INSERT INTO authorization_codes (user_id, app_id, code, scopes, redirect_uri, expires_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+    const id = generateUUID();
+    await pool.query(
+      `INSERT INTO authorization_codes (id, user_id, app_id, code, scopes, redirect_uri, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
+        id,
         payload.user_id,
         payload.app_id,
         payload.code,
@@ -111,10 +123,17 @@ export async function createAuthorizationCode(payload: {
         payload.expires_at,
       ]
     );
-    // @ts-ignore
-    const id = result?.insertId;
-    if (!id) return null;
-    return await getAuthorizationCodeById(id);
+    return {
+      id,
+      user_id: payload.user_id as any,
+      app_id: payload.app_id as any,
+      code: payload.code,
+      scopes: payload.scopes || null,
+      redirect_uri: payload.redirect_uri || null,
+      is_used: 0,
+      expires_at: payload.expires_at,
+      created_at: new Date().toISOString(),
+    } as any;
   } catch (err) {
     console.error(err);
     return null;

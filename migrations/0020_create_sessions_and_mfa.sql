@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE
     IF NOT EXISTS user_sessions (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
         session_token VARCHAR(255) NOT NULL UNIQUE,
         ip_address VARCHAR(45) DEFAULT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS user_mfa_settings (
-        id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
+        id CHAR(36) NOT NULL PRIMARY KEY,
         user_id CHAR(36) NOT NULL UNIQUE,
         mfa_type ENUM ('totp', 'sms', 'email') NOT NULL,
         is_enabled TINYINT (1) NOT NULL DEFAULT 0,

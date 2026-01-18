@@ -1,5 +1,6 @@
 import express from "express";
 import { authenticate } from "../middlewares/auth.middleware.js";
+import { authorizeRoles } from "../middlewares/role.middleware.js";
 import { validateRequest } from "../middlewares/validateRequest.middleware.js";
 import {
   deleteApp,
@@ -14,50 +15,37 @@ import * as appValidator from "../validators/app.validator.js";
 
 const router = express.Router();
 
+// All app management routes require authentication and developer role
+router.use(authenticate);
+router.use(authorizeRoles("developer"));
+
 // Register a new app
 router.post(
   "/register",
-  authenticate,
   validateRequest(appValidator.registerAppSchema),
-  registerApp
+  registerApp,
 );
 
 // Get all apps owned by the authenticated user
-router.get("/my-apps", authenticate, getMyApps);
+router.get("/my-apps", getMyApps);
 
 // Get available apps (for discovery)
-router.get("/available", authenticate, getAvailableApps);
+router.get("/available", getAvailableApps);
 
 // Get a specific app by ID
-router.get(
-  "/:id",
-  authenticate,
-  validateRequest(appValidator.getAppByIdSchema),
-  getAppById
-);
+router.get("/:id", validateRequest(appValidator.getAppByIdSchema), getAppById);
 
 // Update an app
-router.patch(
-  "/:id",
-  authenticate,
-  validateRequest(appValidator.updateAppSchema),
-  updateApp
-);
+router.patch("/:id", validateRequest(appValidator.updateAppSchema), updateApp);
 
 // Rotate client secret
 router.post(
   "/rotate-secret",
-  authenticate,
   validateRequest(appValidator.rotateSecretSchema),
-  rotateSecret
+  rotateSecret,
 );
 
 // Delete an app
-router.delete(
-  "/:id",
-  authenticate,
-  validateRequest(appValidator.deleteAppSchema),
-  deleteApp
-);
+router.delete("/:id", validateRequest(appValidator.deleteAppSchema), deleteApp);
 
 export default router;

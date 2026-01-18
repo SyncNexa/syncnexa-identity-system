@@ -1,7 +1,12 @@
 import express from "express";
+import { authenticate } from "../middlewares/auth.middleware.js";
+import { authorizeRoles } from "../middlewares/role.middleware.js";
 import * as studentsController from "../controllers/students.controller.js";
 
 const router = express.Router();
+
+// Apply authentication to all routes in this router
+router.use(authenticate);
 
 router.post("/documents", studentsController.uploadDocument);
 router.patch("/documents/:id", studentsController.updateDocument);
@@ -12,16 +17,30 @@ router.get("/verification-status", studentsController.getVerificationStatus);
 // Academic records & transcripts
 import * as academicController from "../controllers/academic.controller.js";
 
-router.post("/academics", academicController.addRecord);
-router.patch("/academics/:id", academicController.updateRecord);
-router.get("/academics", academicController.listRecords);
+router.post(
+  "/academics",
+  authorizeRoles("student"),
+  academicController.addRecord,
+);
+router.patch(
+  "/academics/:id",
+  authorizeRoles("student"),
+  academicController.updateRecord,
+);
+router.get(
+  "/academics",
+  authorizeRoles("student", "staff"),
+  academicController.listRecords,
+);
 router.post(
   "/academics/:academicId/transcripts",
-  academicController.uploadTranscript
+  authorizeRoles("student"),
+  academicController.uploadTranscript,
 );
 router.get(
   "/academics/:academicId/transcripts",
-  academicController.listTranscripts
+  authorizeRoles("student", "staff"),
+  academicController.listTranscripts,
 );
 
 // Institution verification requests
@@ -29,14 +48,20 @@ import * as institutionController from "../controllers/institution.controller.js
 
 router.post(
   "/verification-requests",
+  authorizeRoles("student"),
   validateRequest(institutionValidator.createInstitutionVerificationSchema),
-  institutionController.createRequest
+  institutionController.createRequest,
 );
-router.get("/verification-requests", institutionController.listRequests);
+router.get(
+  "/verification-requests",
+  authorizeRoles("student", "staff"),
+  institutionController.listRequests,
+);
 router.patch(
   "/verification-requests/:id",
+  authorizeRoles("staff"),
   validateRequest(institutionValidator.updateInstitutionVerificationSchema),
-  institutionController.updateRequest
+  institutionController.updateRequest,
 );
 
 // Student cards (digital)
@@ -53,54 +78,67 @@ import studentCardValidator from "../validators/studentCard.validator.js";
 
 router.post(
   "/cards",
+  authorizeRoles("student"),
   validateRequest(studentCardValidator.createCardSchema),
-  studentCardController.createCard
+  studentCardController.createCard,
 );
 router.post(
   "/cards/:id/token",
+  authorizeRoles("student"),
   validateRequest(studentCardValidator.issueTokenSchema),
-  studentCardController.issueToken
+  studentCardController.issueToken,
 );
 router.post(
   "/cards/verify",
+  authorizeRoles("student", "staff"),
   validateRequest(studentCardValidator.verifyTokenSchema),
-  studentCardController.verifyToken
+  studentCardController.verifyToken,
 );
 
 // Verification token APIs
 import * as verificationController from "../controllers/verification.controller.js";
 router.post(
   "/verification-tokens",
+  authorizeRoles("student"),
   validateRequest(verificationValidator.issueVerificationSchema),
-  verificationController.issueToken
+  verificationController.issueToken,
 );
 router.patch(
   "/verification-tokens/:id/revoke",
+  authorizeRoles("student"),
   validateRequest(verificationValidator.revokeVerificationSchema),
-  verificationController.revokeToken
+  verificationController.revokeToken,
 );
 router.post(
   "/verification-tokens/validate",
+  authorizeRoles("student", "staff"),
   validateRequest(verificationValidator.validateVerificationSchema),
-  verificationController.validateToken
+  verificationController.validateToken,
 );
-router.get("/verification-tokens/:id/logs", verificationController.getLogs);
+router.get(
+  "/verification-tokens/:id/logs",
+  authorizeRoles("student", "staff"),
+  verificationController.getLogs,
+);
 
 // Shareable links (privacy controls)
 router.post(
   "/shareable-links",
+  authorizeRoles("student"),
   validateRequest(shareableLinkValidator.createShareableLinkSchema),
-  shareableLinkController.createLink
+  shareableLinkController.createLink,
 );
 router.patch(
   "/shareable-links/:id/revoke",
+  authorizeRoles("student"),
   validateRequest(shareableLinkValidator.revokeShareableLinkSchema),
-  shareableLinkController.revokeLink
+  shareableLinkController.revokeLink,
 );
 router.post(
   "/shareable-links/validate",
+  authorizeRoles("student", "staff", "developer"),
   validateRequest(shareableLinkValidator.validateShareableLinkSchema),
-  shareableLinkController.validateLink
+  shareableLinkController.validateLink,
 );
 
 // Portfolio routes
@@ -110,31 +148,48 @@ import cvValidator from "../validators/cv.validator.js";
 
 router.post(
   "/projects",
+  authorizeRoles("student"),
   validateRequest(portfolioValidator.createProjectSchema),
-  portfolioController.createProject
+  portfolioController.createProject,
 );
 router.patch(
   "/projects/:id",
+  authorizeRoles("student"),
   validateRequest(portfolioValidator.updateProjectSchema),
-  portfolioController.updateProject
+  portfolioController.updateProject,
 );
-router.get("/projects", portfolioController.listProjects);
+router.get(
+  "/projects",
+  authorizeRoles("student"),
+  portfolioController.listProjects,
+);
 
 router.post(
   "/certificates",
+  authorizeRoles("student"),
   validateRequest(portfolioValidator.createCertificateSchema),
-  portfolioController.createCertificate
+  portfolioController.createCertificate,
 );
 router.patch(
   "/certificates/:id",
+  authorizeRoles("student"),
   validateRequest(portfolioValidator.updateCertificateSchema),
-  portfolioController.updateCertificate
+  portfolioController.updateCertificate,
 );
-router.get("/certificates", portfolioController.listCertificates);
+router.get(
+  "/certificates",
+  authorizeRoles("student"),
+  portfolioController.listCertificates,
+);
 
 // CV generation
 import * as cvController from "../controllers/cv.controller.js";
-router.get("/cv", validateRequest(cvValidator.getCvSchema), cvController.getCv);
+router.get(
+  "/cv",
+  authorizeRoles("student"),
+  validateRequest(cvValidator.getCvSchema),
+  cvController.getCv,
+);
 
 // Session Management & MFA
 import * as sessionController from "../controllers/session.controller.js";
@@ -142,25 +197,44 @@ import sessionValidator from "../validators/session.validator.js";
 
 router.post(
   "/sessions",
+  authorizeRoles("student", "developer", "staff"),
   validateRequest(sessionValidator.createSessionSchema),
-  sessionController.createSession
+  sessionController.createSession,
 );
-router.get("/sessions", sessionController.listActiveSessions);
+router.get(
+  "/sessions",
+  authorizeRoles("student", "developer", "staff"),
+  sessionController.listActiveSessions,
+);
 router.patch(
   "/sessions/:id/revoke",
+  authorizeRoles("student", "developer", "staff"),
   validateRequest(sessionValidator.revokeSessionSchema),
-  sessionController.revokeSession
+  sessionController.revokeSession,
 );
-router.post("/sessions/revoke-all", sessionController.revokeAllSessions);
+router.post(
+  "/sessions/revoke-all",
+  authorizeRoles("student", "developer", "staff"),
+  sessionController.revokeAllSessions,
+);
 
 // TOTP MFA
-router.post("/mfa/totp/setup", sessionController.setupTotp);
+router.post(
+  "/mfa/totp/setup",
+  authorizeRoles("student", "developer", "staff"),
+  sessionController.setupTotp,
+);
 router.post(
   "/mfa/totp/enable",
+  authorizeRoles("student", "developer", "staff"),
   validateRequest(sessionValidator.enableTotpSchema),
-  sessionController.enableTotp
+  sessionController.enableTotp,
 );
-router.post("/mfa/totp/disable", sessionController.disableTotp);
+router.post(
+  "/mfa/totp/disable",
+  authorizeRoles("student", "developer", "staff"),
+  sessionController.disableTotp,
+);
 
 // Dashboard & Progress
 import * as dashboardController from "../controllers/dashboard.controller.js";
@@ -168,33 +242,38 @@ import dashboardValidator from "../validators/dashboard.validator.js";
 
 router.get(
   "/dashboard",
+  authorizeRoles("student"),
   validateRequest(dashboardValidator.getDashboardSchema),
-  dashboardController.getDashboard
+  dashboardController.getDashboard,
 );
 router.get(
   "/dashboard/progress",
+  authorizeRoles("student"),
   validateRequest(dashboardValidator.getDashboardSchema),
-  dashboardController.getProgress
+  dashboardController.getProgress,
 );
 router.get(
   "/dashboard/suggestions",
+  authorizeRoles("student"),
   validateRequest(dashboardValidator.getDashboardSchema),
-  dashboardController.getSuggestions
+  dashboardController.getSuggestions,
 );
 
 // Attach multer and validation to upload endpoints
 router.post(
   "/documents",
+  authorizeRoles("student"),
   upload.uploadSingle("document"),
   validateRequest(studentValidator.uploadDocumentSchema),
-  studentsController.uploadDocument
+  studentsController.uploadDocument,
 );
 
 router.post(
   "/academics/:academicId/transcripts",
+  authorizeRoles("student"),
   upload.uploadSingle("transcript"),
   validateRequest(academicValidator.uploadTranscriptSchema),
-  academicController.uploadTranscript
+  academicController.uploadTranscript,
 );
 
 export default router;

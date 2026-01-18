@@ -80,6 +80,14 @@
       {
         "label": "User Profile",
         "path": "api/user-profile"
+      },
+      {
+        "label": "Email Verification",
+        "path": "api/email-verification"
+      },
+      {
+        "label": "Universities & Faculties",
+        "path": "api/universities"
       }
     ]
   },

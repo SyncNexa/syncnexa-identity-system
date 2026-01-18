@@ -365,6 +365,39 @@ Complete documentation for user authentication, registration, and session manage
 
 ---
 
+## 5. Email Verification
+
+After registration, users should verify their email to unlock student and staff features. Verification is OTP-based and requires authentication.
+
+### Steps
+
+1. Request OTP: `POST /auth/verify-email/request`
+
+- Sends a 6-digit OTP to the user's email
+- OTP expires in 15 minutes
+
+2. Verify OTP: `POST /auth/verify-email`
+
+- Body: `{ "otp": "123456" }`
+- Marks the account `is_verified = true` on success
+
+3. Check Status: `GET /auth/verify-email/status`
+
+- Returns `{ is_verified: boolean }`
+
+4. Resend OTP: `POST /auth/verify-email/resend`
+
+- Revokes any existing OTP and sends a new one
+
+### Error Cases
+
+- 404: No active OTP for user
+- 410: OTP expired – request or resend a new OTP
+- 422: Incorrect OTP – verify and try again
+- 429: Too many requests – wait and retry
+
+---
+
 ## Authentication Flow Diagram
 
 ```
@@ -490,19 +523,16 @@ Complete documentation for user authentication, registration, and session manage
 ### For Client Applications
 
 1. **Store Tokens Securely:**
-
    - Use httpOnly cookies for web applications
    - Use secure storage (Keychain/Keystore) for mobile apps
    - Never store tokens in localStorage in web apps
 
 2. **Token Refresh Strategy:**
-
    - Implement automatic token refresh when receiving 401 responses
    - Refresh tokens proactively before expiration (e.g., at 14 minutes)
    - Handle refresh token expiration gracefully by redirecting to login
 
 3. **Error Handling:**
-
    - Display user-friendly error messages
    - Log detailed errors for debugging
    - Implement retry logic for network failures

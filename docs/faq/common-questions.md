@@ -99,4 +99,6 @@ Contact support at [support@syncnexa.com](mailto:support@syncnexa.com) or open a
 ## Next Steps
 
 → [Quick Start](../getting-started/quick-start) — Implementation guide  
-→ [SAuth Flow](../auth/oauth-flow) — Deep dive into the flow
+→ [SAuth Flow](../auth/oauth-flow) — Deep dive into the flow  
+→ [Email Verification](../api/email-verification) — Verify user email with OTP  
+→ [Universities & Faculties](../api/universities) — Discover institutions and faculties

@@ -1,14 +1,12 @@
 // src/middleware/rateLimiter.ts
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
-import { createClient } from "redis";
 import type { Request, Response, NextFunction } from "express";
+import cacheService from "../services/cache.service.js";
 
 const isProd = process.env.NODE_ENV === "production";
-const redisUrl = process.env.REDIS_URL ?? "redis://127.0.0.1:6379";
-const redisClient = isProd ? createClient({ url: redisUrl }) : null;
-
-if (redisClient) redisClient.connect().catch(console.error);
+const isRedisEnabled = isProd || process.env.ENABLE_REDIS === "true";
+const redisClient = cacheService.getClient();
 
 // Temporary IP ban memory store
 const bannedIPs = new Map<string, number>();
@@ -49,7 +47,7 @@ export const apiLimiter = rateLimit({
       options.message ?? {
         success: false,
         message: "Too many requests, please slow down.",
-      }
+      },
     );
   },
 
@@ -58,10 +56,10 @@ export const apiLimiter = rateLimit({
     message: "Too many requests. Please slow down.",
   },
 
-  ...(redisClient
+  ...(isRedisEnabled && redisClient
     ? {
         store: new RedisStore({
-          sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+          sendCommand: (...args: string[]) => redisClient.call(...args),
         }),
       }
     : {}),

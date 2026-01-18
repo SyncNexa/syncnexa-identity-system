@@ -73,4 +73,6 @@ console.log(userData);
 
 → [OAuth Flow](../auth/oauth-flow) — Deep dive into the authorization process  
 → [API Reference](../api/authorize) — Explore all endpoints  
+→ [Email Verification](../api/email-verification) — Verify user email with OTP  
+→ [Universities & Faculties](../api/universities) — Discover institutions and faculties  
 → [Examples](../examples/nodejs) — Language-specific implementations

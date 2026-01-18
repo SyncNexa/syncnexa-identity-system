@@ -26,7 +26,7 @@ export async function authenticateUser(email: string, password: string) {
 export async function findRefreshToken(token: string) {
   const [rows] = await pool.query<RowDataPacket[]>(
     "SELECT * FROM refresh_tokens WHERE token = ? AND expires_at > NOW()",
-    [token]
+    [token],
   );
   return rows[0];
 }

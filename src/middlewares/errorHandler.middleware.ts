@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import chalk from "chalk";
 import { logger } from "../utils/logger.js";
 import { sendError } from "../utils/error.js";
+import { DuplicateEmailError } from "../models/user.model.js";
 
 // export function errorHandler(
 //   err: any,
@@ -26,7 +27,7 @@ export function errorHandler(
   err: any,
   req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ) {
   const ip =
     req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
@@ -45,11 +46,16 @@ export function errorHandler(
       chalk.red(`Message: ${message}`),
       chalk.gray(stack),
       "\n",
-    ].join("\n")
+    ].join("\n"),
   );
 
   // 📝 File log for production / audits
   logger.error(`Error from ${route} - IP: ${ip} - ${message}\n${stack}`);
+
+  // Handle specific error types
+  if (err instanceof DuplicateEmailError) {
+    return sendError(409, err.message, res);
+  }
 
   // Generic response for users
   // Infer a more accurate HTTP status code when possible

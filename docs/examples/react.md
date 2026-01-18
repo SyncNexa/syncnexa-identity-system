@@ -143,7 +143,7 @@ export function generateRandomState() {
   const array = new Uint8Array(16);
   crypto.getRandomValues(array);
   return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
-    ""
+    "",
   );
 }
 ```
@@ -159,3 +159,98 @@ export function generateRandomState() {
 
 → [Python Example](./python) — Backend implementation  
 → [Quick Start](../getting-started/quick-start) — Overview
+
+## Email Verification (React)
+
+Add a simple widget to request, verify, check status, and resend OTP.
+
+```jsx
+import { useState } from "react";
+
+export function EmailVerificationWidget() {
+  const [otp, setOtp] = useState("");
+  const [status, setStatus] = useState(null);
+  const token = localStorage.getItem("accessToken");
+
+  async function requestOtp() {
+    const res = await fetch(
+      `${process.env.REACT_APP_SAUTH_BASE_URL}/auth/verify-email/request`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    setStatus(await res.json());
+  }
+
+  async function verifyOtp() {
+    const res = await fetch(
+      `${process.env.REACT_APP_SAUTH_BASE_URL}/auth/verify-email`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ otp }),
+      },
+    );
+    setStatus(await res.json());
+  }
+
+  async function checkStatus() {
+    const res = await fetch(
+      `${process.env.REACT_APP_SAUTH_BASE_URL}/auth/verify-email/status`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    setStatus(await res.json());
+  }
+
+  async function resendOtp() {
+    const res = await fetch(
+      `${process.env.REACT_APP_SAUTH_BASE_URL}/auth/verify-email/resend`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    setStatus(await res.json());
+  }
+
+  return (
+    <div>
+      <h3>Email Verification</h3>
+      <button onClick={requestOtp}>Request OTP</button>
+      <input
+        value={otp}
+        onChange={(e) => setOtp(e.target.value)}
+        placeholder="Enter 6-digit OTP"
+      />
+      <button onClick={verifyOtp}>Verify</button>
+      <button onClick={checkStatus}>Check Status</button>
+      <button onClick={resendOtp}>Resend OTP</button>
+      <pre>{status && JSON.stringify(status, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+## Discover Universities & Faculties (React)
+
+```jsx
+export async function listUniversitiesNG() {
+  const res = await fetch(
+    `${process.env.REACT_APP_SAUTH_BASE_URL}/universities?countryCode=NG`,
+  );
+  return res.json();
+}
+
+export async function getFutoFaculties() {
+  const res = await fetch(
+    `${process.env.REACT_APP_SAUTH_BASE_URL}/institutions/FUTO_NG/faculties`,
+  );
+  return res.json();
+}
+```

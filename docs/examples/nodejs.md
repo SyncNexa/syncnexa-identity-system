@@ -34,7 +34,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-  })
+  }),
 );
 
 // Helper to generate random state
@@ -82,7 +82,7 @@ app.get("/auth/callback", async (req, res) => {
         client_id: process.env.SAUTH_CLIENT_ID,
         client_secret: process.env.SAUTH_CLIENT_SECRET,
         app_id: process.env.SAUTH_APP_ID,
-      }
+      },
     );
 
     const { access_token, expires_in } = tokenResponse.data;
@@ -112,7 +112,7 @@ app.get("/dashboard", async (req, res) => {
         headers: {
           Authorization: `Bearer ${req.session.accessToken}`,
         },
-      }
+      },
     );
 
     const user = userResponse.data;
@@ -143,4 +143,6 @@ app.listen(3000);
 ## Next Steps
 
 → [React Example](./react) — Frontend implementation  
-→ [Quick Start](../getting-started/quick-start) — Overview
+→ [Quick Start](../getting-started/quick-start) — Overview  
+→ [Email Verification](../api/email-verification) — Verify user email with OTP  
+→ [Universities & Faculties](../api/universities) — Discover institutions and faculties

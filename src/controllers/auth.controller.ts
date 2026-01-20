@@ -4,7 +4,10 @@ import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
 import { sendError } from "../utils/error.js";
 import { internalError } from "../utils/httpError.js";
 import * as authService from "../services/auth.service.js";
-import { DuplicateEmailError } from "../models/user.model.js";
+import {
+  DuplicateEmailError,
+  DuplicateMatricNumberError,
+} from "../models/user.model.js";
 import { enrichStudentData } from "../utils/universities.js";
 
 export async function createUser(
@@ -25,6 +28,11 @@ export async function createUser(
   } catch (err) {
     // Handle duplicate email error with 409 Conflict
     if (err instanceof DuplicateEmailError) {
+      return sendError(409, err.message, res);
+    }
+
+    // Handle duplicate matric number error with 409 Conflict
+    if (err instanceof DuplicateMatricNumberError) {
       return sendError(409, err.message, res);
     }
 

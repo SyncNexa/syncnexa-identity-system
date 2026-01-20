@@ -78,8 +78,36 @@ Returns curated faculties and departments for supported Nigerian institutions. O
 
 ---
 
+## Programs for Institution
+
+- **Route:** `GET /institutions/:code/programs`
+- **Path Param:** `code` – Institution code (e.g., `FUTO_NG`)
+
+Returns allowed degree programs (global list) for use in dropdown/search. Currently the same list is returned for all institutions to avoid free-text input.
+
+### Success Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "message": "Programs retrieved successfully",
+  "data": {
+    "institutionCode": "FUTO_NG",
+    "count": 5,
+    "programs": ["b.tech", "b.sc", "b.eng", "mba", "phd"]
+  }
+}
+```
+
+### Error Responses
+
+- 400 Bad Request – Missing or invalid `code`
+- 404 Not Found – Institution code not recognized
+
+---
+
 ## Notes
 
 - `code` format: `<SHORT>_<COUNTRYCODE>` (e.g., `FUTO_NG`)
 - `short` is unique and supplied in the universities list
-- Faculties are curated for Nigerian institutions first; more countries will be added progressively
+- Faculties are curated for Nigerian institutions first; programs list is global (degree types) for consistency across schools

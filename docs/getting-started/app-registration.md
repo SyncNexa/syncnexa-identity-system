@@ -36,9 +36,16 @@ Content-Type: application/json
   "password": "SecurePassword123!",
   "firstName": "John",
   "lastName": "Doe",
-  "role": "student"
+  "role": "developer",
+  "country": "Nigeria",
+  "state": "Lagos",
+  "address": "123 Developer Street",
+  "gender": "male",
+  "phone": "+2348012345678"
 }
 ```
+
+> **Note:** For student registration, you must include `academic_info` with `institution`, `matric_number`, and `program`. See [Authentication Flow](../flows/authentication.md) for details.
 
 ### Step 2: Login to Get Access Token
 

@@ -13,6 +13,7 @@ import {
   isValidInstitution,
   isValidFacultyForInstitution,
 } from "../utils/universities.js";
+import { isValidProgramForInstitution } from "../utils/programs.js";
 import { z } from "zod";
 
 const router = express.Router();
@@ -82,20 +83,21 @@ export const registerSchema = z.object({
       address: addressSchema,
       gender: genderSchema,
       phone: phoneSchema,
-      // Student-specific required fields
-      institution: z
-        .string()
-        .min(1, "Institution code is required for students")
-        .refine(
-          (code) => isValidInstitution(code),
-          "Invalid institution code. Please use institution codes like FUTO_NG, IMSU_NG, etc.",
-        ),
-      matric_number: z
-        .string()
-        .min(2, "Matric number is required for students"),
-      // Optional academic info (nested under academic_info for students)
+      // Academic info (required for students, contains all academic-related fields)
       academic_info: z
         .object({
+          institution: z
+            .string()
+            .min(1, "Institution code is required for students")
+            .refine(
+              (code) => isValidInstitution(code),
+              "Invalid institution code. Please use institution codes like FUTO_NG, IMSU_NG, etc.",
+            )
+            .optional(),
+          matric_number: z
+            .string()
+            .min(2, "Matric number is required for students")
+            .optional(),
           department: z
             .string()
             .min(2, "Department must be at least 2 characters")
@@ -109,6 +111,12 @@ export const registerSchema = z.object({
             .min(2, "Program (degree) is required for students")
             .optional(),
           student_level: z.string().optional(),
+          admission_year: z
+            .number()
+            .int()
+            .min(1900)
+            .max(new Date().getFullYear())
+            .optional(),
           graduation_year: z
             .number()
             .int()
@@ -122,16 +130,20 @@ export const registerSchema = z.object({
     .strict()
     .refine(
       (data) => {
-        // If role is student, validate required student fields
+        // If role is student, validate required student fields from academic_info
         if (data.role === "student") {
-          return Boolean(data.institution && data.matric_number);
+          return Boolean(
+            data.academic_info &&
+            data.academic_info.institution &&
+            data.academic_info.matric_number,
+          );
         }
         return true;
       },
       {
         message:
-          "Institution and matric_number are required for student registration",
-        path: ["institution"],
+          "Institution and matric_number are required in academic_info for student registration",
+        path: ["academic_info"],
       },
     )
     .refine(
@@ -150,14 +162,48 @@ export const registerSchema = z.object({
     )
     .refine(
       (data) => {
+        // If role is student, admission and graduation years are required
+        if (data.role === "student") {
+          return Boolean(
+            data.academic_info?.admission_year &&
+            data.academic_info?.graduation_year,
+          );
+        }
+        return true;
+      },
+      {
+        message:
+          "admission_year and graduation_year are required in academic_info for student registration",
+        path: ["academic_info"],
+      },
+    )
+    .refine(
+      (data) => {
+        // Ensure admission year is not after graduation year
+        if (data.role === "student") {
+          const admission = data.academic_info?.admission_year;
+          const graduation = data.academic_info?.graduation_year;
+          if (admission && graduation) {
+            return admission <= graduation;
+          }
+        }
+        return true;
+      },
+      {
+        message: "admission_year cannot be greater than graduation_year",
+        path: ["academic_info"],
+      },
+    )
+    .refine(
+      (data) => {
         // If role is student and faculty is provided, validate it against institution
         if (
           data.role === "student" &&
           data.academic_info?.faculty &&
-          data.institution
+          data.academic_info?.institution
         ) {
           return isValidFacultyForInstitution(
-            data.institution,
+            data.academic_info.institution,
             data.academic_info.faculty,
           );
         }
@@ -166,6 +212,26 @@ export const registerSchema = z.object({
       {
         message: "Faculty code is not valid for the selected institution",
         path: ["academic_info", "faculty"],
+      },
+    )
+    .refine(
+      (data) => {
+        // If role is student and we know programs for the institution, validate program
+        if (
+          data.role === "student" &&
+          data.academic_info?.program &&
+          data.academic_info?.institution
+        ) {
+          return isValidProgramForInstitution(
+            data.academic_info.institution,
+            data.academic_info.program,
+          );
+        }
+        return true;
+      },
+      {
+        message: "Program is not in the allowed list of degree types",
+        path: ["academic_info", "program"],
       },
     ),
 });

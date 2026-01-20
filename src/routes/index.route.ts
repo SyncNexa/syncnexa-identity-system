@@ -6,6 +6,7 @@ import {
   getFacultiesForInstitution,
   isValidInstitution,
 } from "../utils/universities.js";
+import { getProgramsForInstitution } from "../utils/programs.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
 
@@ -71,6 +72,27 @@ router.get("/institutions/:code/faculties", (req, res) => {
     institutionCode,
     count: faculties.length,
     faculties,
+  });
+});
+
+// Public endpoint to fetch programs for a specific institution
+router.get("/institutions/:code/programs", (req, res) => {
+  const institutionCode = req.params.code?.toUpperCase();
+
+  if (!institutionCode) {
+    return sendError(400, "Institution code is required", res);
+  }
+
+  if (!isValidInstitution(institutionCode)) {
+    return sendError(404, "Institution not found", res);
+  }
+
+  const programs = getProgramsForInstitution(institutionCode);
+
+  return sendSuccess(200, "Programs retrieved successfully", res, {
+    institutionCode,
+    count: programs.length,
+    programs,
   });
 });
 

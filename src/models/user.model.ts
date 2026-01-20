@@ -3,11 +3,18 @@ import pool from "../config/db.js";
 import bcrypt from "bcrypt";
 import { generateUUID } from "../utils/uuid.js";
 
-// Custom error class for duplicate entry errors
+// Custom error classes for duplicate entry errors
 export class DuplicateEmailError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "DuplicateEmailError";
+  }
+}
+
+export class DuplicateMatricNumberError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DuplicateMatricNumberError";
   }
 }
 
@@ -59,22 +66,20 @@ export async function createNewUser(user: any) {
 
     // For student role, require institution and matric_number
     if (userRole === "student") {
-      const institution = user.institution || null;
-      const matric = user.matric_number || null;
+      const academicInfo = user.academic_info || {};
+      const institution = academicInfo.institution || null;
+      const matric = academicInfo.matric_number || null;
       if (!institution || !matric) {
         // rollback and throw so caller can handle
         await client.rollback();
         throw new Error(
-          "Missing student information: institution and matric_number required for student registration",
+          "Missing student information: institution and matric_number required in academic_info for student registration",
         );
       }
 
-      // Extract academic info from nested object if present
-      const academicInfo = user.academic_info || {};
-
       await client.query(
-        `INSERT INTO students (user_id, institution, matric_number, department, faculty, program, student_level, graduation_year)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO students (user_id, institution, matric_number, department, faculty, program, student_level, admission_year, graduation_year)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           userId,
           institution,
@@ -83,6 +88,7 @@ export async function createNewUser(user: any) {
           academicInfo.faculty || null,
           academicInfo.program || null,
           academicInfo.student_level || null,
+          academicInfo.admission_year || null,
           academicInfo.graduation_year || null,
         ],
       );
@@ -93,7 +99,7 @@ export async function createNewUser(user: any) {
   } catch (err) {
     await client.rollback();
 
-    // Handle duplicate email error (MySQL error code 1062)
+    // Handle duplicate entry errors (MySQL error code 1062)
     if (err instanceof Error) {
       const errorMessage = err.message;
       if (
@@ -105,6 +111,11 @@ export async function createNewUser(user: any) {
             "Email address is already registered. Please use a different email or login instead.",
           );
         }
+        if (errorMessage.includes("matric_number")) {
+          throw new DuplicateMatricNumberError(
+            "This matric number is already registered. Each student can only have one account.",
+          );
+        }
         throw new DuplicateEmailError(
           "Duplicate entry found. Please check your information.",
         );
@@ -113,6 +124,9 @@ export async function createNewUser(user: any) {
 
     console.error("Error creating user:", err);
     throw err;
+  } finally {
+    // Always release the connection back to the pool
+    client.release();
   }
 }
 

@@ -16,17 +16,47 @@ Complete documentation for user authentication, registration, and session manage
 
 ### Request Payload
 
+#### Basic Registration (Visitor/Staff/Developer)
+
 ```json
 {
   "firstName": "John",
   "lastName": "Doe",
   "email": "john.doe@example.com",
   "password": "SecureP@ss123",
+  "role": "staff",
   "country": "Nigeria",
   "state": "Lagos",
   "address": "123 Main Street, Ikeja",
   "gender": "male",
   "phone": "+2348012345678"
+}
+```
+
+#### Student Registration
+
+```json
+{
+  "firstName": "Ada",
+  "lastName": "Obi",
+  "email": "ada.obi@example.com",
+  "password": "SecureP@ss123",
+  "role": "student",
+  "country": "Nigeria",
+  "state": "Imo",
+  "address": "FUTO Campus Road",
+  "gender": "female",
+  "phone": "+2348012345678",
+  "academic_info": {
+    "institution": "FUTO_NG",
+    "matric_number": "20201230342",
+    "program": "B.Tech",
+    "department": "Information Technology",
+    "faculty": "SICT",
+    "admission_year": 2021,
+    "student_level": "300",
+    "graduation_year": 2025
+  }
 }
 ```
 
@@ -38,13 +68,29 @@ Complete documentation for user authentication, registration, and session manage
 | lastName  | string | Yes      | Minimum 2 characters                                                 |
 | email     | string | Yes      | Valid email format                                                   |
 | password  | string | Yes      | Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character |
+| role      | string | Yes      | Enum: "student", "staff", "developer"                                |
 | country   | string | Yes      | 2-56 characters, letters and spaces only                             |
 | state     | string | Yes      | 2-50 characters, letters, spaces, or hyphens                         |
 | address   | string | Yes      | 5-100 characters, alphanumeric and .,#-/ allowed                     |
 | gender    | string | Yes      | Enum: "male", "female", "non-binary", "other"                        |
 | phone     | string | Yes      | E.164 format (e.g., +2348012345678), 8-15 digits                     |
 
+### Student-Specific Required Fields (inside academic_info)
+
+| Field                         | Type   | Required for Students | Validation Rules                                |
+| ----------------------------- | ------ | --------------------- | ----------------------------------------------- |
+| academic_info.institution     | string | Yes                   | Valid institution code (e.g., FUTO_NG, IMSU_NG) |
+| academic_info.matric_number   | string | Yes                   | Minimum 2 characters                            |
+| academic_info.program         | string | Yes                   | Degree type (e.g., B.Tech, B.Sc, B.Eng, MBA)    |
+| academic_info.department      | string | No                    | Minimum 2 characters                            |
+| academic_info.faculty         | string | No                    | Valid faculty code for the institution          |
+| academic_info.admission_year  | number | Yes                   | Integer between 1900 and current year           |
+| academic_info.student_level   | string | No                    | Student's current level (e.g., 100, 200, 300)   |
+| academic_info.graduation_year | number | Yes                   | Integer between 1900 and current year + 10      |
+
 ### Success Response (201 Created)
+
+#### Non-Student Registration Response
 
 ```json
 {
@@ -56,17 +102,47 @@ Complete documentation for user authentication, registration, and session manage
     "email": "john.doe@example.com",
     "first_name": "John",
     "last_name": "Doe",
-    "country": "Nigeria",
-    "state": "Lagos",
-    "address": "123 Main Street, Ikeja",
+    "user_country": "Nigeria",
+    "user_state": "Lagos",
+    "user_address": "123 Main Street, Ikeja",
     "gender": "male",
     "phone": "+2348012345678",
-    "user_role": "visitor",
+    "user_role": "staff",
     "is_verified": false,
-    "created_at": "2026-01-11T10:30:00.000Z"
+    "account_status": "active"
   }
 }
 ```
+
+#### Student Registration Response
+
+```json
+{
+  "status": "success",
+  "statusCode": 201,
+  "message": "User created successfully!",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "john.doe@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "user_country": "Nigeria",
+    "user_state": "Lagos",
+    "user_address": "123 Main Street, Ikeja",
+    "gender": "male",
+    "phone": "+2348012345678",
+    "user_role": "student",
+    "is_verified": false,
+    "account_status": "active",
+    "institution": "Federal University of Technology, Owerri",
+    "institution_code": "FUTO_NG",
+    "faculty": "School of Information and Communication Technology",
+    "faculty_code": "SICT"
+  }
+}
+```
+
+**Note:** For student registrations, the response is enriched with full institution and faculty names derived from the provided codes.
 
 ### Error Responses
 
@@ -98,11 +174,17 @@ Complete documentation for user authentication, registration, and session manage
   - "Password must contain at least one lowercase letter"
   - "Password must contain at least one number"
   - "Password must contain at least one special character"
+- **Invalid role:** 'Invalid role. Supported roles are: "student", "staff", or "developer"'
 - **Invalid country:** "Country must contain only letters and spaces"
 - **Invalid state:** "State must contain only letters, spaces, or hyphens"
 - **Invalid address:** "Address contains invalid characters"
 - **Invalid phone:** "Invalid phone number format (use E.164, e.g. +2348012345678)"
 - **Invalid gender:** "Invalid enum value. Expected 'male' | 'female' | 'non-binary' | 'other'"
+- **Missing student fields:** "Institution and matric_number are required in academic_info for student registration"
+- **Missing program:** "Program (degree) is required in academic_info for student registration"
+- **Invalid program:** "Program is not in the allowed list of degree types"
+- **Invalid institution:** "Invalid institution code. Please use institution codes like FUTO_NG, IMSU_NG, etc."
+- **Invalid faculty:** "Faculty code is not valid for the selected institution"
 
 #### 409 Conflict - Email Already Exists
 
@@ -110,11 +192,23 @@ Complete documentation for user authentication, registration, and session manage
 {
   "status": "error",
   "statusCode": 409,
-  "message": "User with this email already exists"
+  "message": "Email address is already registered. Please use a different email or login instead."
 }
 ```
 
 **What Happens:** The email is already registered in the system. No duplicate account is created. The existing account remains unchanged. User should try logging in instead or use a different email address.
+
+#### 409 Conflict - Matric Number Already Exists (Students Only)
+
+```json
+{
+  "status": "error",
+  "statusCode": 409,
+  "message": "This matric number is already registered. Each student can only have one account."
+}
+```
+
+**What Happens:** The matric number is already registered in the system. This security measure prevents students from creating multiple accounts with different email addresses. Each student is limited to one account per matric number. The user should use their existing account or contact support if they believe this is an error.
 
 #### 500 Internal Server Error
 

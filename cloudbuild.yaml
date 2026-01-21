@@ -1,0 +1,21 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "$IMAGE_NAME", "."]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "$IMAGE_NAME"]
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - run
+      - deploy
+      - idaas-staging
+      - --image=$IMAGE_NAME
+      - --region=us-central1
+      - --allow-unauthenticated
+
+images:
+  - "$IMAGE_NAME"
+
+substitutions:
+  IMAGE_NAME: us-central1-docker.pkg.dev/$PROJECT_ID/idaas-repo/idaas

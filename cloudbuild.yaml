@@ -2,7 +2,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _IMAGE_NAME: us-central1-docker.pkg.dev/${PROJECT_ID}/idaas-repo/idaas
+  _IMAGE_NAME: africa-south1-docker.pkg.dev/${PROJECT_ID}/idaas-repo/idaas
 
 steps:
   - name: "gcr.io/cloud-builders/docker"

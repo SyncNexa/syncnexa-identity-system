@@ -1,5 +1,6 @@
 import * as adminModel from "../../models/admin/admin.model.js";
 import * as userModel from "../../models/admin/user.model.js";
+import * as verificationModel from "../../models/admin/verification.model.js";
 
 /**
  * Get dashboard statistics
@@ -117,4 +118,49 @@ export async function deleteUser(userId: string) {
   }
 
   return { message: "User deleted successfully" };
+}
+
+/**
+ * List verifications with filters
+ */
+export async function listVerifications(params: {
+  page?: number;
+  limit?: number;
+  status?: verificationModel.VerificationStatus;
+  type?: verificationModel.VerificationType;
+  user_id?: string;
+}) {
+  return verificationModel.listVerifications(params);
+}
+
+/**
+ * Get verification by ID
+ */
+export async function getVerificationById(id: string) {
+  const verification = await verificationModel.getVerificationById(id);
+  if (!verification) {
+    throw new Error("Verification not found");
+  }
+  return verification;
+}
+
+/**
+ * Update verification status (approve/reject)
+ */
+export async function updateVerificationStatus(
+  id: string,
+  status: verificationModel.VerificationStatus,
+  adminId: string,
+) {
+  const updated = await verificationModel.updateVerificationStatus(
+    id,
+    status,
+    adminId,
+  );
+
+  if (!updated) {
+    throw new Error("Verification not found or already updated");
+  }
+
+  return { message: `Verification ${status} successfully` };
 }

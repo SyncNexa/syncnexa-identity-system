@@ -246,6 +246,88 @@ grafana:
     - "3001:3000"
 ```
 
+## Secrets Management
+
+### Best Practices for Production
+
+**DO NOT commit `.env.production` to version control.** The repository includes `.gitignore` rules to prevent this, but verify:
+
+```bash
+git status  # Should NOT show .env.production
+```
+
+### Options for Secret Injection
+
+#### 1. **Docker Secrets** (Recommended for Swarm)
+
+```bash
+# Create secrets
+echo "your_jwt_secret" | docker secret create jwt_secret -
+echo "your_db_password" | docker secret create db_password -
+
+# Reference in docker-compose.yml
+services:
+  identity:
+    secrets:
+      - jwt_secret
+      - db_password
+    environment:
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+```
+
+#### 2. **Environment Variables** (For Kubernetes)
+
+```yaml
+# kubernetes-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: identity-secrets
+type: Opaque
+data:
+  JWT_SECRET: base64_encoded_value
+  DB_PASSWORD: base64_encoded_value
+```
+
+#### 3. **Vault/Secrets Manager** (For Enterprise)
+
+```bash
+# Using HashiCorp Vault
+docker run -e VAULT_ADDR=https://vault.example.com \
+  -e VAULT_TOKEN=your_token \
+  your-registry/syncnexa-identity
+```
+
+### Configuration Steps
+
+1. **Copy template to actual file**
+
+   ```bash
+   cp .env.example .env.production
+   ```
+
+2. **Update with real secrets**
+
+   ```bash
+   # Use secure method (vault, secrets manager, etc.)
+   # DO NOT paste secrets directly
+   ```
+
+3. **Verify file is ignored**
+
+   ```bash
+   git check-ignore .env.production  # Should return .env.production
+   ```
+
+4. **For CI/CD pipelines**
+   ```bash
+   # GitHub Actions example
+   - name: Create .env.production
+     run: |
+       echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.production
+       echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.production
+   ```
+
 ### CI/CD Integration
 
 **GitHub Actions Example:**

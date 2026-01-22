@@ -1,24 +1,24 @@
 options:
   logging: CLOUD_LOGGING_ONLY
 
+substitutions:
+  _IMAGE_NAME: us-central1-docker.pkg.dev/${PROJECT_ID}/idaas-repo/idaas
+
 steps:
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "$IMAGE_NAME", "."]
+    args: ["build", "-t", "${_IMAGE_NAME}", "."]
 
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "$IMAGE_NAME"]
+    args: ["push", "${_IMAGE_NAME}"]
 
   - name: "gcr.io/cloud-builders/gcloud"
     args:
       - run
       - deploy
       - idaas-staging
-      - --image=$IMAGE_NAME
+      - --image=${_IMAGE_NAME}
       - --region=us-central1
       - --allow-unauthenticated
 
 images:
-  - "$IMAGE_NAME"
-
-substitutions:
-  IMAGE_NAME: us-central1-docker.pkg.dev/$PROJECT_ID/idaas-repo/idaas
+  - "${_IMAGE_NAME}"

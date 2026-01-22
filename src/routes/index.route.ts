@@ -9,6 +9,7 @@ import {
 import { getProgramsForInstitution } from "../utils/programs.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import adminRoutes from "./admin/index.route.js";
 
 const router = express.Router();
 
@@ -95,5 +96,8 @@ router.get("/institutions/:code/programs", (req, res) => {
     programs,
   });
 });
+
+// Admin routes
+router.use("/admin", adminRoutes);
 
 export default router;

@@ -9,6 +9,8 @@ import {
 } from "../controllers/auth.controller.js";
 import * as emailVerificationController from "../controllers/emailVerification.controller.js";
 import emailVerificationValidator from "../validators/emailVerification.validator.js";
+import * as passwordResetController from "../controllers/passwordReset.controller.js";
+import passwordResetValidator from "../validators/passwordReset.validator.js";
 import {
   isValidInstitution,
   isValidFacultyForInstitution,
@@ -272,7 +274,23 @@ router.post(
   emailVerificationController.resendOTP,
 );
 
-// router.post("/forgot-password");
-// router.post("/reset-password");
+// Password reset routes (public - no authentication required)
+router.post(
+  "/forgot-password",
+  validateRequest(passwordResetValidator.requestPasswordResetSchema),
+  passwordResetController.requestPasswordReset,
+);
+
+router.post(
+  "/verify-password-reset-otp",
+  validateRequest(passwordResetValidator.verifyPasswordResetOTPSchema),
+  passwordResetController.verifyPasswordResetOTP,
+);
+
+router.post(
+  "/reset-password",
+  validateRequest(passwordResetValidator.resetPasswordSchema),
+  passwordResetController.resetPassword,
+);
 
 export default router;

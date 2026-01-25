@@ -183,3 +183,32 @@ export async function markUserVerified(id: string) {
     return null;
   }
 }
+
+export async function updateUserPassword(id: string, passwordHash: string) {
+  const client = await pool.getConnection();
+  try {
+    await client.beginTransaction();
+    const [row] = await client.query<RowDataPacket[]>(
+      `SELECT * FROM users WHERE id = ?`,
+      [id],
+    );
+    if (row.length == 0) {
+      return null;
+    }
+    await client.query(`UPDATE users SET password_hash = ? WHERE id = ?`, [
+      passwordHash,
+      id,
+    ]);
+
+    const [result] = await client.query<RowDataPacket[]>(
+      `SELECT * FROM users WHERE id = ?`,
+      [id],
+    );
+    await client.commit();
+    return result[0];
+  } catch (err) {
+    client.rollback();
+    console.log(err);
+    return null;
+  }
+}

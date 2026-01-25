@@ -40,3 +40,9 @@ export async function getUserByIdMinimal(userId: string) {
   if (!user) return null;
   return { id: user.id, email: user.email, role: user.user_role };
 }
+
+export async function getUserByEmail(email: string) {
+  const user = await selectUserByEmail(email);
+  if (!user) return null;
+  return { id: user.id, email: user.email, role: user.user_role };
+}

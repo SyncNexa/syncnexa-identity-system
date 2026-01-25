@@ -59,12 +59,12 @@ RUN mkdir -p logs uploads && \
 # Switch to non-root user
 USER nodejs
 
-# Expose application port
-EXPOSE 3000
+# Expose application port (CloudRun uses 8080)
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
+    CMD node -e "require('http').get('http://localhost:8080/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
 
 # Set environment to production
 ENV NODE_ENV=production

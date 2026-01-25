@@ -28,7 +28,7 @@ export async function insertAcademicRecord(rec: {
         rec.degree || null,
         rec.gpa || null,
         rec.meta ? JSON.stringify(rec.meta) : null,
-      ]
+      ],
     );
     return {
       id,
@@ -72,11 +72,11 @@ export async function updateAcademicRecord(id: number | string, updates: any) {
   try {
     await pool.query(
       `UPDATE academic_records SET ${fields.join(", ")} WHERE id = ?`,
-      values
+      values,
     );
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT * FROM academic_records WHERE id = ?`,
-      [id]
+      [id],
     );
     return rows[0] || null;
   } catch (err) {
@@ -89,12 +89,25 @@ export async function findAcademicByUser(userId: number | string) {
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT * FROM academic_records WHERE user_id = ? ORDER BY start_date DESC`,
-      [userId]
+      [userId],
     );
     return rows || [];
   } catch (err) {
     console.error(err);
     return [];
+  }
+}
+
+export async function getStudentByUserId(userId: number | string) {
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT * FROM students WHERE user_id = ?`,
+      [userId],
+    );
+    return rows[0] || null;
+  } catch (err) {
+    console.error(err);
+    return null;
   }
 }
 
@@ -118,7 +131,7 @@ export async function insertTranscript(payload: {
         payload.mime_type || null,
         payload.file_size || null,
         payload.metadata ? JSON.stringify(payload.metadata) : null,
-      ]
+      ],
     );
     return {
       id: tId,
@@ -139,7 +152,7 @@ export async function findTranscriptsByAcademic(academicId: number | string) {
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT * FROM transcripts WHERE academic_record_id = ? ORDER BY uploaded_at DESC`,
-      [academicId]
+      [academicId],
     );
     return rows || [];
   } catch (err) {
@@ -152,6 +165,7 @@ export default {
   insertAcademicRecord,
   updateAcademicRecord,
   findAcademicByUser,
+  getStudentByUserId,
   insertTranscript,
   findTranscriptsByAcademic,
 };

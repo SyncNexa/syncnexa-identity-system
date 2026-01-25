@@ -259,6 +259,13 @@ router.get(
   dashboardController.getSuggestions,
 );
 
+router.get(
+  "/overview",
+  authorizeRoles("student"),
+  validateRequest(dashboardValidator.getDashboardSchema),
+  dashboardController.getStudentOverview,
+);
+
 // Attach multer and validation to upload endpoints
 router.post(
   "/documents",

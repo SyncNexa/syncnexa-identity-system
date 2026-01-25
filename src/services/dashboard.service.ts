@@ -1,5 +1,8 @@
 import profileProgressModel from "../models/profileProgress.model.js";
 import metricsModel from "../models/metrics.model.js";
+import * as userModel from "../models/user.model.js";
+import * as studentModel from "../models/academic.model.js";
+import * as studentCardModel from "../models/studentCard.model.js";
 
 export async function calculateProfileCompletion(userId: number | string) {
   try {
@@ -148,3 +151,153 @@ export default {
   getProgressSuggestions,
   getDashboardMetrics,
 };
+
+/**
+ * Get comprehensive student overview
+ * Includes personal info, academic info, verification progress, and digital student ID
+ */
+export async function getStudentOverview(userId: number | string) {
+  try {
+    // Fetch user data
+    const user = await userModel.selectUserById(userId as string);
+    if (!user) return null;
+
+    // Fetch student data
+    const student = await studentModel.getStudentByUserId(userId);
+
+    // Fetch metrics
+    const metrics = await metricsModel.getUserMetrics(userId);
+
+    // Fetch student card
+    const studentCards = await studentCardModel.findCardByUser(userId);
+    const studentCard = studentCards[0] || null;
+
+    // Calculate verification progress
+    const verificationProgress = {
+      personal_info: {
+        status: user.first_name && user.last_name ? "completed" : "pending",
+        completion_percentage: 100,
+        details: {
+          firstName: user.first_name,
+          lastName: user.last_name,
+          email: user.email,
+          phone: user.phone,
+          gender: user.gender,
+          country: user.user_country,
+          state: user.user_state,
+          address: user.user_address,
+        },
+      },
+      academic_info: {
+        status:
+          metrics.academics_count > 0 && metrics.transcripts_count > 0
+            ? "completed"
+            : metrics.academics_count > 0
+              ? "in_progress"
+              : "pending",
+        completion_percentage:
+          metrics.academics_count > 0 && metrics.transcripts_count > 0
+            ? 100
+            : metrics.academics_count > 0
+              ? 50
+              : 0,
+        details: student
+          ? {
+              institution: student.institution,
+              matricNumber: student.matric_number,
+              department: student.department,
+              faculty: student.faculty,
+              program: student.program,
+              studentLevel: student.student_level,
+              admissionYear: student.admission_year,
+              graduationYear: student.graduation_year,
+              academicRecords: metrics.academics_count,
+              transcripts: metrics.transcripts_count,
+            }
+          : null,
+      },
+      documents: {
+        status:
+          metrics.documents_verified > 0
+            ? "verified"
+            : metrics.documents_count > 0
+              ? "pending"
+              : "not_started",
+        completion_percentage:
+          metrics.documents_verified > 0
+            ? 100
+            : metrics.documents_count > 0
+              ? 50
+              : 0,
+        details: {
+          uploaded: metrics.documents_count,
+          verified: metrics.documents_verified,
+          pending: metrics.documents_count - metrics.documents_verified,
+        },
+      },
+      school_verification: {
+        status:
+          metrics.institution_verified > 0
+            ? "verified"
+            : metrics.institution_verifications_count > 0
+              ? "pending"
+              : "not_started",
+        completion_percentage:
+          metrics.institution_verified > 0
+            ? 100
+            : metrics.institution_verifications_count > 0
+              ? 50
+              : 0,
+        details: {
+          requested: metrics.institution_verifications_count,
+          approved: metrics.institution_verified,
+          pending:
+            metrics.institution_verifications_count -
+            metrics.institution_verified,
+        },
+      },
+    };
+
+    // Digital student ID info
+    const digitalStudentID = studentCard
+      ? {
+          id: studentCard.id,
+          cardUuid: studentCard.card_uuid,
+          status: "active",
+          createdAt: studentCard.created_at,
+          expiresAt: studentCard.expires_at || null,
+        }
+      : {
+          status: "not_created",
+          message: "No digital student ID created yet",
+        };
+
+    // Overall profile progress
+    const profileProgress = await calculateProfileCompletion(userId);
+
+    return {
+      userId,
+      verificationProgress,
+      digitalStudentID,
+      profileCompletion: {
+        overall: profileProgress?.profile_completion_percent || 0,
+        details: profileProgress,
+      },
+      metrics: {
+        documents: metrics.documents_count,
+        documentsVerified: metrics.documents_verified,
+        academicRecords: metrics.academics_count,
+        transcripts: metrics.transcripts_count,
+        projects: metrics.projects_count,
+        certificates: metrics.certificates_count,
+        certificatesVerified: metrics.certificates_verified,
+        institutionVerifications: metrics.institution_verifications_count,
+        institutionVerified: metrics.institution_verified,
+        mfaEnabled: metrics.has_mfa_enabled,
+      },
+    };
+  } catch (err) {
+    console.error("Error getting student overview:", err);
+    return null;
+  }
+}

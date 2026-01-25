@@ -50,4 +50,25 @@ export async function getSuggestions(req: Request, res: Response) {
   }
 }
 
-export default { getDashboard, getProgress, getSuggestions };
+export async function getStudentOverview(req: Request, res: Response) {
+  try {
+    const userId = (req.user as any)?.id;
+    if (!userId) return sendError(400, "user id required", res);
+
+    const overview = await dashboardService.getStudentOverview(userId);
+    if (!overview)
+      return sendError(500, "Failed to fetch student overview", res);
+
+    return sendSuccess(200, "Student overview", res, overview);
+  } catch (err) {
+    console.error(err);
+    return sendError(500, "Failed to fetch student overview", res);
+  }
+}
+
+export default {
+  getDashboard,
+  getProgress,
+  getSuggestions,
+  getStudentOverview,
+};

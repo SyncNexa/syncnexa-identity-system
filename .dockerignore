@@ -51,9 +51,9 @@ temp
 *~
 
 # Documentation (unless needed)
-docs
-*.md
-!README.md
+# docs
+# *.md
+# !README.md
 
 # CI/CD
 .github

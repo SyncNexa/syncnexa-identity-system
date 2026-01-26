@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as academicService from "../services/academic.service.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import { paramToString } from "../utils/params.js";
 
 export async function addRecord(req: Request, res: Response) {
   try {
@@ -21,7 +22,7 @@ export async function addRecord(req: Request, res: Response) {
 
 export async function updateRecord(req: Request, res: Response) {
   try {
-    const id = req.params.id;
+    const id = paramToString(req.params.id);
     if (!id) return sendError(400, "id required", res);
     const updates = req.body;
     const updated = await academicService.updateAcademicRecord(id, updates);
@@ -38,7 +39,7 @@ export async function listRecords(req: Request, res: Response) {
     const userId = req.user?.id || req.query.user_id || req.query.userId;
     if (!userId) return sendError(400, "user_id required", res);
     const rows = await academicService.getAcademicRecordsForUser(
-      userId as string
+      userId as string,
     );
     return sendSuccess(200, "Academic records", res, rows);
   } catch (err) {
@@ -49,7 +50,7 @@ export async function listRecords(req: Request, res: Response) {
 
 export async function uploadTranscript(req: Request, res: Response) {
   try {
-    const academicId = req.params.academicId;
+    const academicId = paramToString(req.params.academicId);
     if (!academicId) return sendError(400, "academic id required", res);
     const file = (req as any).file;
     const { metadata } = req.body;
@@ -77,7 +78,7 @@ export async function uploadTranscript(req: Request, res: Response) {
 
 export async function listTranscripts(req: Request, res: Response) {
   try {
-    const academicId = req.params.academicId;
+    const academicId = paramToString(req.params.academicId);
     if (!academicId) return sendError(400, "academic id required", res);
     const rows = await academicService.getTranscripts(academicId);
     return sendSuccess(200, "Transcripts", res, rows);

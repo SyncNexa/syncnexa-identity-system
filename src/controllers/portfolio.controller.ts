@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as portfolioService from "../services/portfolio.service.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import { paramToString } from "../utils/params.js";
 
 export async function createProject(req: Request, res: Response) {
   try {
@@ -21,7 +22,7 @@ export async function createProject(req: Request, res: Response) {
 
 export async function updateProject(req: Request, res: Response) {
   try {
-    const id = req.params.id;
+    const id = paramToString(req.params.id);
     if (!id) return sendError(400, "id required", res);
     const updates = req.body;
     const updated = await portfolioService.editProject(id, updates);
@@ -64,7 +65,7 @@ export async function createCertificate(req: Request, res: Response) {
 
 export async function updateCertificate(req: Request, res: Response) {
   try {
-    const id = req.params.id;
+    const id = paramToString(req.params.id);
     if (!id) return sendError(400, "id required", res);
     const updates = req.body;
     const updated = await portfolioService.updateCertificate(id, updates);
@@ -81,7 +82,7 @@ export async function listCertificates(req: Request, res: Response) {
     const userId = req.user?.id || req.query.user_id || req.query.userId;
     if (!userId) return sendError(400, "user_id required", res);
     const rows = await portfolioService.getCertificatesForUser(
-      userId as string
+      userId as string,
     );
     return sendSuccess(200, "Certificates", res, rows);
   } catch (err) {

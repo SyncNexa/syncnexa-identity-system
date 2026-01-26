@@ -4,6 +4,7 @@ import type {
   VerificationStatus,
   VerificationType,
 } from "../../models/admin/verification.model.js";
+import { paramToString } from "../../utils/params.js";
 
 /**
  * Get dashboard statistics
@@ -133,7 +134,7 @@ export async function getAllUsers(req: Request, res: Response) {
  */
 export async function getUserById(req: Request, res: Response) {
   try {
-    const userId = req.params.userId;
+    const userId = paramToString(req.params.userId);
     if (!userId) {
       return res
         .status(400)
@@ -169,7 +170,7 @@ export async function getUserById(req: Request, res: Response) {
  */
 export async function verifyUserEmail(req: Request, res: Response) {
   try {
-    const userId = req.params.userId;
+    const userId = paramToString(req.params.userId);
     if (!userId) {
       return res
         .status(400)
@@ -205,8 +206,15 @@ export async function verifyUserEmail(req: Request, res: Response) {
  */
 export async function updateUserRole(req: Request, res: Response) {
   try {
-    const { userId } = req.params;
+    const userId = paramToString(req.params.userId);
     const { role } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
 
     if (!["student", "developer", "staff"].includes(role)) {
       return res.status(400).json({
@@ -215,14 +223,14 @@ export async function updateUserRole(req: Request, res: Response) {
       });
     }
 
-    const result = await adminService.updateUserRole(userId!, role);
+    const result = await adminService.updateUserRole(userId, role);
 
     // Create audit log
     if (req.auditLog) {
       await adminService.createAuditLog({
         ...req.auditLog,
         resource_type: "user",
-        resource_id: userId!,
+        resource_id: userId,
         metadata: { action: "update_role", new_role: role },
       });
     }
@@ -245,7 +253,7 @@ export async function updateUserRole(req: Request, res: Response) {
  */
 export async function deleteUser(req: Request, res: Response) {
   try {
-    const userId = req.params.userId;
+    const userId = paramToString(req.params.userId);
     if (!userId) {
       return res
         .status(400)
@@ -346,7 +354,7 @@ export async function listVerifications(req: Request, res: Response) {
  */
 export async function getVerificationById(req: Request, res: Response) {
   try {
-    const { id } = req.params;
+    const id = paramToString(req.params.id);
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -383,7 +391,7 @@ export async function getVerificationById(req: Request, res: Response) {
  */
 export async function updateVerificationStatus(req: Request, res: Response) {
   try {
-    const { id } = req.params;
+    const id = paramToString(req.params.id);
     const { status } = req.body as { status?: VerificationStatus };
 
     if (!id) {

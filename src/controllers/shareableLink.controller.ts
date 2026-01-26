@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
 import * as shareableLinkService from "../services/shareableLink.service.js";
+import { paramToString } from "../utils/params.js";
 
 export async function createLink(req: Request, res: Response) {
   try {
@@ -27,7 +28,7 @@ export async function createLink(req: Request, res: Response) {
 
 export async function revokeLink(req: Request, res: Response) {
   try {
-    const id = req.params.id;
+    const id = paramToString(req.params.id);
     if (!id) return sendError(400, "id required", res);
     const updated = await shareableLinkService.revokeShareableLink(id);
     if (!updated) return sendError(404, "Link not found", res);
@@ -45,7 +46,7 @@ export async function validateLink(req: Request, res: Response) {
       (req.query && (req.query.token as string));
     if (!token) return sendError(400, "token required", res);
     const result = await shareableLinkService.validateShareableLink(
-      token as string
+      token as string,
     );
     if (!result.valid)
       return sendError(401, `Invalid link: ${result.reason}`, res);

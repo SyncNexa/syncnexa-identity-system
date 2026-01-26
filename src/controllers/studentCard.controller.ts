@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as studentCardService from "../services/studentCard.service.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import { paramToString } from "../utils/params.js";
 
 export async function createCard(req: Request, res: Response) {
   try {
@@ -9,7 +10,7 @@ export async function createCard(req: Request, res: Response) {
     if (!userId) return sendError(400, "user_id required", res);
     const card = await studentCardService.createStudentCard(
       userId as string,
-      req.body.meta || null
+      req.body.meta || null,
     );
     if (!card) return sendError(500, "Failed to create card", res);
     return sendSuccess(201, "Card created", res, card);
@@ -21,7 +22,7 @@ export async function createCard(req: Request, res: Response) {
 
 export async function issueToken(req: Request, res: Response) {
   try {
-    const cardId = req.params.id;
+    const cardId = paramToString(req.params.id);
     if (!cardId) return sendError(400, "card id required", res);
     const userId = req.user?.id || req.body.user_id || req.body.userId;
     if (!userId) return sendError(400, "user_id required", res);
@@ -29,7 +30,7 @@ export async function issueToken(req: Request, res: Response) {
     const result = await studentCardService.issueCardToken(
       cardId,
       userId as string,
-      ttl
+      ttl,
     );
     if (!result) return sendError(500, "Failed to issue token", res);
     return sendSuccess(201, "Token issued", res, {

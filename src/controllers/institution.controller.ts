@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as institutionService from "../services/institution.service.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import { paramToString } from "../utils/params.js";
 
 export async function createRequest(req: Request, res: Response) {
   try {
@@ -29,7 +30,7 @@ export async function listRequests(req: Request, res: Response) {
     const userId = req.user?.id || req.query.user_id || req.query.userId;
     if (!userId) return sendError(400, "user_id required", res);
     const rows = await institutionService.getVerificationRequestsForUser(
-      userId as string
+      userId as string,
     );
     return sendSuccess(200, "Verification requests", res, rows);
   } catch (err) {
@@ -40,12 +41,12 @@ export async function listRequests(req: Request, res: Response) {
 
 export async function updateRequest(req: Request, res: Response) {
   try {
-    const id = req.params.id;
+    const id = paramToString(req.params.id);
     if (!id) return sendError(400, "id required", res);
     const updates = req.body;
     const updated = await institutionService.setVerificationRequestStatus(
       id,
-      updates
+      updates,
     );
     if (!updated) return sendError(404, "Request not found", res);
     return sendSuccess(200, "Request updated", res, updated);

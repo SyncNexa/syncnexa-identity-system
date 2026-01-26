@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as studentService from "../services/student.service.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import { paramToString } from "../utils/params.js";
 
 export async function uploadDocument(req: Request, res: Response) {
   try {
@@ -34,7 +35,7 @@ export async function uploadDocument(req: Request, res: Response) {
 
 export async function updateDocument(req: Request, res: Response) {
   try {
-    const id = req.params.id;
+    const id = paramToString(req.params.id);
     if (!id) return sendError(400, "document id required", res);
     const updates = req.body;
     const updated = await studentService.updateIdentityDocument(id, updates);
@@ -48,7 +49,7 @@ export async function updateDocument(req: Request, res: Response) {
 
 export async function requestVerification(req: Request, res: Response) {
   try {
-    const docId = req.params.id;
+    const docId = paramToString(req.params.id);
     if (!docId) return sendError(400, "document id required", res);
     const reviewerId = req.user?.id ? Number((req.user as any).id) : null;
     const { notes, metadata } = req.body;
@@ -56,7 +57,7 @@ export async function requestVerification(req: Request, res: Response) {
       docId,
       reviewerId,
       notes,
-      metadata
+      metadata,
     );
     if (!ver) return sendError(500, "Failed to create verification", res);
     return sendSuccess(201, "Verification request created", res, ver);
@@ -68,12 +69,12 @@ export async function requestVerification(req: Request, res: Response) {
 
 export async function setVerificationStatus(req: Request, res: Response) {
   try {
-    const verId = req.params.id;
+    const verId = paramToString(req.params.id);
     if (!verId) return sendError(400, "verification id required", res);
     const updates = req.body;
     const updated = await studentService.setDocumentVerificationStatus(
       verId,
-      updates
+      updates,
     );
     if (!updated) return sendError(404, "Verification not found", res);
     return sendSuccess(200, "Verification updated", res, updated);
@@ -88,7 +89,7 @@ export async function getVerificationStatus(req: Request, res: Response) {
     const userId = req.user?.id || req.query.user_id || req.query.userId;
     if (!userId) return sendError(400, "user_id required", res);
     const status = await studentService.getUserVerificationStatus(
-      userId as string
+      userId as string,
     );
     return sendSuccess(200, "Verification status", res, status);
   } catch (err) {

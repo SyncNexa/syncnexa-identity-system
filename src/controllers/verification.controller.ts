@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as verificationService from "../services/verification.service.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import { paramToString } from "../utils/params.js";
 
 export async function issueToken(req: Request, res: Response) {
   try {
@@ -17,7 +18,7 @@ export async function issueToken(req: Request, res: Response) {
       issuedFor,
       issuedBy,
       ttl,
-      metadata
+      metadata,
     );
     if (!result) return sendError(500, "Failed to issue token", res);
     return sendSuccess(201, "Verification token issued", res, result);
@@ -29,7 +30,7 @@ export async function issueToken(req: Request, res: Response) {
 
 export async function revokeToken(req: Request, res: Response) {
   try {
-    const id = req.params.id;
+    const id = paramToString(req.params.id);
     if (!id) return sendError(400, "id required", res);
     const updated = await verificationService.revokeVerificationToken(id);
     if (!updated) return sendError(404, "Token not found", res);
@@ -45,7 +46,7 @@ export async function validateToken(req: Request, res: Response) {
     const token = req.body.token || req.query.token;
     if (!token) return sendError(400, "token required", res);
     const ok = await verificationService.validateVerificationToken(
-      token as string
+      token as string,
     );
     if (!ok.valid) return sendError(401, `Invalid token: ${ok.reason}`, res);
     // Log usage
@@ -53,7 +54,7 @@ export async function validateToken(req: Request, res: Response) {
       ok.record?.id || null,
       (req.user?.id as any) || req.ip,
       "validate",
-      { accessed: true }
+      { accessed: true },
     );
     return sendSuccess(200, "Token valid", res, {
       decoded: ok.decoded,
@@ -68,7 +69,7 @@ export async function validateToken(req: Request, res: Response) {
 
 export async function getLogs(req: Request, res: Response) {
   try {
-    const tokenId = req.params.id;
+    const tokenId = paramToString(req.params.id);
     if (!tokenId) return sendError(400, "token id required", res);
     const rows = await verificationService.getVerificationLogs(tokenId);
     return sendSuccess(200, "Verification logs", res, rows);

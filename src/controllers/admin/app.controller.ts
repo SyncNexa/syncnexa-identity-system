@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import * as appService from "../../services/admin/app.service.js";
 import * as adminService from "../../services/admin/admin.service.js";
+import { paramToString } from "../../utils/params.js";
 
 /**
  * Get all apps
@@ -52,7 +53,7 @@ export async function getAllApps(req: Request, res: Response) {
  */
 export async function updateAppStatus(req: Request, res: Response) {
   try {
-    const appId = req.params.appId;
+    const appId = paramToString(req.params.appId);
     if (!appId) {
       return res
         .status(400)
@@ -97,7 +98,7 @@ export async function updateAppStatus(req: Request, res: Response) {
  */
 export async function deleteApp(req: Request, res: Response) {
   try {
-    const appId = req.params.appId;
+    const appId = paramToString(req.params.appId);
     if (!appId) {
       return res
         .status(400)
@@ -133,7 +134,7 @@ export async function deleteApp(req: Request, res: Response) {
  */
 export async function regenerateAppSecret(req: Request, res: Response) {
   try {
-    const appId = req.params.appId;
+    const appId = paramToString(req.params.appId);
     if (!appId) {
       return res
         .status(400)

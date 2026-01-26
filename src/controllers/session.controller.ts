@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
 import * as sessionService from "../services/session.service.js";
+import { paramToString } from "../utils/params.js";
 
 // Session Management
 export async function createSession(req: Request, res: Response) {
@@ -42,7 +43,7 @@ export async function listActiveSessions(req: Request, res: Response) {
 
 export async function revokeSession(req: Request, res: Response) {
   try {
-    const id = req.params.id;
+    const id = paramToString(req.params.id);
     if (!id) return sendError(400, "session id required", res);
 
     const updated = await sessionService.revokeSession(id);

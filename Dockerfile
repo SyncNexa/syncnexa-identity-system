@@ -49,12 +49,14 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
 
-# Copy migrations
+# Copy migrations and startup script
 COPY --chown=nodejs:nodejs migrations ./migrations
+COPY --chown=nodejs:nodejs start.sh ./start.sh
 
 # Create necessary directories with proper permissions
 RUN mkdir -p logs uploads && \
-    chown -R nodejs:nodejs logs uploads
+    chown -R nodejs:nodejs logs uploads && \
+    chmod +x start.sh
 
 # Switch to non-root user
 USER nodejs
@@ -72,5 +74,5 @@ ENV NODE_ENV=production
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application with migrations
+CMD ["sh", "start.sh"]

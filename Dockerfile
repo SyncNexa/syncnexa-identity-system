@@ -49,8 +49,9 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
 
-# Copy migrations and startup script
+# Copy migrations, docs, and startup script
 COPY --chown=nodejs:nodejs migrations ./migrations
+COPY --chown=nodejs:nodejs docs ./docs
 COPY --chown=nodejs:nodejs start.sh ./start.sh
 
 # Create necessary directories with proper permissions

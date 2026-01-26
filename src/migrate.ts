@@ -25,7 +25,7 @@ async function ensureMigrationsTable(): Promise<void> {
 
 async function getExecutedMigrations(): Promise<string[]> {
   const [rows] = await pool.query<RowDataPacket[]>(
-    "SELECT name FROM migrations ORDER BY id ASC"
+    "SELECT name FROM migrations ORDER BY id ASC",
   );
   return rows.map((row: RowDataPacket) => row.name);
 }
@@ -60,7 +60,16 @@ function parseMigrationFile(filePath: string): { up: string; down: string } {
 }
 
 async function runStatements(sql: string): Promise<void> {
-  const statements = sql
+  // Remove SQL comments (lines starting with --)
+  const cleanedSql = sql
+    .split("\n")
+    .filter((line) => {
+      const trimmed = line.trim();
+      return trimmed.length > 0 && !trimmed.startsWith("--");
+    })
+    .join("\n");
+
+  const statements = cleanedSql
     .split(";")
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
@@ -100,7 +109,7 @@ async function migrate(direction: "up" | "down" = "up"): Promise<void> {
         `Error ${
           direction === "up" ? "applying" : "rolling back"
         } migration ${migrationFile}:`,
-        error
+        error,
       );
       throw error;
     }

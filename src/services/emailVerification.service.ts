@@ -1,4 +1,6 @@
 import * as emailVerificationModel from "../models/emailVerification.model.js";
+import * as userModel from "../models/user.model.js";
+import { sendEmailVerificationOTP } from "../utils/email.js";
 
 /**
  * Generate a 6-digit OTP
@@ -24,6 +26,32 @@ export async function createEmailVerificationToken(userId: string) {
     return { tokenId, otp };
   } catch (err) {
     console.error("Error creating email verification token:", err);
+    throw err;
+  }
+}
+
+/**
+ * Create email verification token and send OTP to user's email
+ */
+export async function createAndSendEmailVerificationOTP(userId: string) {
+  try {
+    // Get user's email
+    const user = await userModel.selectUserById(userId);
+    if (!user || !user.email) {
+      throw new Error("User not found or email not available");
+    }
+
+    // Create OTP token
+    const { tokenId, otp } = await createEmailVerificationToken(userId);
+
+    // Send OTP to user's email
+    await sendEmailVerificationOTP(user.email, otp, 15);
+
+    console.log(`[EMAIL] Verification OTP sent to ${user.email}`);
+
+    return { tokenId, sent: true };
+  } catch (err) {
+    console.error("Error creating and sending email verification OTP:", err);
     throw err;
   }
 }
@@ -66,6 +94,22 @@ export async function revokeEmailVerificationTokens(userId: string) {
     );
   } catch (err) {
     console.error("Error revoking email verification tokens:", err);
+    throw err;
+  }
+}
+
+/**
+ * Get user by email (helper function for unauthenticated verification)
+ */
+export async function getUserByEmail(email: string) {
+  try {
+    const user = await userModel.selectUserByEmail(email);
+    if (!user) {
+      return null;
+    }
+    return { id: user.id, email: user.email };
+  } catch (err) {
+    console.error("Error getting user by email:", err);
     throw err;
   }
 }

@@ -2,9 +2,41 @@ import crypto from "crypto";
 import sessionModel from "../models/session.model.js";
 import mfaModel from "../models/mfa.model.js";
 import speakeasy from "speakeasy";
+import { parseDeviceInfo } from "../utils/deviceParser.js";
 
 function formatDateForDb(date: Date) {
   return date.toISOString().slice(0, 19).replace("T", " ");
+}
+
+/**
+ * Get approximate location from IP address
+ * For production, consider using a service like MaxMind or ip-geolocation-api
+ */
+async function getLocationFromIp(
+  ipAddress: string | null,
+): Promise<string | null> {
+  if (!ipAddress || ipAddress === "::1" || ipAddress === "127.0.0.1") {
+    return "Local";
+  }
+
+  try {
+    // Using free IP geolocation service (no key required)
+    // In production, consider a more reliable paid service
+    const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+    if (!response.ok) return null;
+
+    const data: any = await response.json();
+    if (data.city && data.country_name) {
+      return `${data.city}, ${data.country_name}`;
+    }
+    if (data.country_name) {
+      return data.country_name;
+    }
+    return null;
+  } catch (err) {
+    console.warn(`Could not fetch geolocation for IP ${ipAddress}:`, err);
+    return null;
+  }
 }
 
 export async function createSession(input: {
@@ -16,11 +48,28 @@ export async function createSession(input: {
   const token = crypto.randomBytes(32).toString("hex");
   const ttl = input.ttlSeconds ?? 86400 * 7; // 7 days
   const expiresAt = new Date(Date.now() + ttl * 1000);
+
+  // Parse device information from user agent
+  const deviceInfo = input.userAgent
+    ? parseDeviceInfo(input.userAgent)
+    : {
+        browser: "Unknown",
+        deviceType: "unknown" as const,
+        deviceName: "Unknown Device",
+      };
+
+  // Get location from IP
+  const location = await getLocationFromIp(input.ipAddress || null);
+
   const record = await sessionModel.createSession({
     user_id: input.userId,
     session_token: token,
     ip_address: input.ipAddress || null,
     user_agent: input.userAgent || null,
+    device_name: deviceInfo.deviceName,
+    browser: deviceInfo.browser,
+    device_type: deviceInfo.deviceType,
+    location: location,
     expires_at: formatDateForDb(expiresAt),
   });
   return { token, record };
@@ -90,7 +139,7 @@ export async function enableTotpMfa(userId: number | string, token: string) {
 
   // Generate backup codes
   const backupCodes = Array.from({ length: 10 }, () =>
-    crypto.randomBytes(4).toString("hex").toUpperCase()
+    crypto.randomBytes(4).toString("hex").toUpperCase(),
   );
 
   const now = new Date();

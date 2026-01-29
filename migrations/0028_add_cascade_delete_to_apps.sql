@@ -1,0 +1,11 @@
+-- UP
+ALTER TABLE apps
+DROP FOREIGN KEY apps_ibfk_1;
+
+ALTER TABLE apps ADD CONSTRAINT apps_ibfk_1 FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE;
+
+-- DOWN
+ALTER TABLE apps
+DROP FOREIGN KEY apps_ibfk_1;
+
+ALTER TABLE apps ADD CONSTRAINT apps_ibfk_1 FOREIGN KEY (owner_id) REFERENCES users (id);

@@ -8,6 +8,7 @@ import * as loginSecurityService from "../services/loginSecurity.service.js";
 import * as activityService from "../services/activity.service.js";
 import * as emailVerificationService from "../services/emailVerification.service.js";
 import * as sessionService from "../services/session.service.js";
+import { sendWelcomeEmail } from "../utils/email.js";
 import {
   DuplicateEmailError,
   DuplicateMatricNumberError,
@@ -22,6 +23,15 @@ export async function createUser(
   try {
     const result = await authService.registerUser(req.body);
     if (result) {
+      // Send welcome email
+      try {
+        await sendWelcomeEmail(result.email, result.first_name);
+        console.log(`[EMAIL] Welcome email sent to ${result.email}`);
+      } catch (emailErr) {
+        console.error("[EMAIL] Error sending welcome email:", emailErr);
+        // Don't fail the registration if email sending fails
+      }
+
       // Send email verification OTP immediately after signup
       try {
         await emailVerificationService.createAndSendEmailVerificationOTP(

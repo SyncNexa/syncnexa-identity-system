@@ -1,12 +1,45 @@
 import express from "express";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/role.middleware.js";
+import { activityLog } from "../middlewares/activity.middleware.js";
+import upload from "../middlewares/upload.middleware.js";
+import { validateRequest } from "../middlewares/validateRequest.middleware.js";
+
 import * as studentsController from "../controllers/students.controller.js";
+import * as activityController from "../controllers/activity.controller.js";
+import * as academicController from "../controllers/academic.controller.js";
+import * as institutionController from "../controllers/institution.controller.js";
+import * as studentCardController from "../controllers/studentCard.controller.js";
+import * as shareableLinkController from "../controllers/shareableLink.controller.js";
+import * as verificationController from "../controllers/verification.controller.js";
+import * as portfolioController from "../controllers/portfolio.controller.js";
+import * as cvController from "../controllers/cv.controller.js";
+import * as sessionController from "../controllers/session.controller.js";
+import * as dashboardController from "../controllers/dashboard.controller.js";
+
+import studentValidator from "../validators/student.validator.js";
+import academicValidator from "../validators/academic.validator.js";
+import verificationValidator from "../validators/verification.validator.js";
+import shareableLinkValidator from "../validators/shareableLink.validator.js";
+import institutionValidator from "../validators/institution.validator.js";
+import studentCardValidator from "../validators/studentCard.validator.js";
+import portfolioValidator from "../validators/portfolio.validator.js";
+import cvValidator from "../validators/cv.validator.js";
+import sessionValidator from "../validators/session.validator.js";
+import dashboardValidator from "../validators/dashboard.validator.js";
 
 const router = express.Router();
 
 // Apply authentication to all routes in this router
 router.use(authenticate);
+router.use(activityLog());
+
+// User activity logs (students)
+router.get(
+  "/activities",
+  authorizeRoles("student"),
+  activityController.getMyActivities,
+);
 
 router.post("/documents", studentsController.uploadDocument);
 router.patch("/documents/:id", studentsController.updateDocument);
@@ -15,8 +48,6 @@ router.patch("/verifications/:id", studentsController.setVerificationStatus);
 router.get("/verification-status", studentsController.getVerificationStatus);
 
 // Academic records & transcripts
-import * as academicController from "../controllers/academic.controller.js";
-
 router.post(
   "/academics",
   authorizeRoles("student"),
@@ -44,8 +75,6 @@ router.get(
 );
 
 // Institution verification requests
-import * as institutionController from "../controllers/institution.controller.js";
-
 router.post(
   "/verification-requests",
   authorizeRoles("student"),
@@ -65,17 +94,6 @@ router.patch(
 );
 
 // Student cards (digital)
-import * as studentCardController from "../controllers/studentCard.controller.js";
-import upload from "../middlewares/upload.middleware.js";
-import { validateRequest } from "../middlewares/validateRequest.middleware.js";
-import studentValidator from "../validators/student.validator.js";
-import academicValidator from "../validators/academic.validator.js";
-import verificationValidator from "../validators/verification.validator.js";
-import shareableLinkValidator from "../validators/shareableLink.validator.js";
-import * as shareableLinkController from "../controllers/shareableLink.controller.js";
-import institutionValidator from "../validators/institution.validator.js";
-import studentCardValidator from "../validators/studentCard.validator.js";
-
 router.post(
   "/cards",
   authorizeRoles("student"),
@@ -96,7 +114,6 @@ router.post(
 );
 
 // Verification token APIs
-import * as verificationController from "../controllers/verification.controller.js";
 router.post(
   "/verification-tokens",
   authorizeRoles("student"),
@@ -142,10 +159,6 @@ router.post(
 );
 
 // Portfolio routes
-import * as portfolioController from "../controllers/portfolio.controller.js";
-import portfolioValidator from "../validators/portfolio.validator.js";
-import cvValidator from "../validators/cv.validator.js";
-
 router.post(
   "/projects",
   authorizeRoles("student"),
@@ -183,7 +196,6 @@ router.get(
 );
 
 // CV generation
-import * as cvController from "../controllers/cv.controller.js";
 router.get(
   "/cv",
   authorizeRoles("student"),
@@ -192,9 +204,6 @@ router.get(
 );
 
 // Session Management & MFA
-import * as sessionController from "../controllers/session.controller.js";
-import sessionValidator from "../validators/session.validator.js";
-
 router.post(
   "/sessions",
   authorizeRoles("student", "developer", "staff"),
@@ -237,9 +246,6 @@ router.post(
 );
 
 // Dashboard & Progress
-import * as dashboardController from "../controllers/dashboard.controller.js";
-import dashboardValidator from "../validators/dashboard.validator.js";
-
 router.get(
   "/dashboard",
   authorizeRoles("student"),

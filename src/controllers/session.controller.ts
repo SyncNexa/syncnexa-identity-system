@@ -34,7 +34,23 @@ export async function listActiveSessions(req: Request, res: Response) {
     if (!userId) return sendError(400, "user id required", res);
 
     const sessions = await sessionService.getActiveSessions(userId);
-    return sendSuccess(200, "Active sessions", res, sessions);
+
+    // Format sessions for better UI display
+    const formattedSessions = sessions.map((session: any) => ({
+      id: session.id,
+      device: {
+        name: session.device_name || "Unknown Device",
+        browser: session.browser || "Unknown Browser",
+        type: session.device_type || "unknown",
+      },
+      ip_address: session.ip_address,
+      location: session.location,
+      last_activity: session.last_activity,
+      created_at: session.created_at,
+      is_current: false, // Could be set based on current token if needed
+    }));
+
+    return sendSuccess(200, "Active sessions", res, formattedSessions);
   } catch (err) {
     console.error(err);
     return sendError(500, "Failed to list sessions", res);

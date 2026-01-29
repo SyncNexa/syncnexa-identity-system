@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 export const requestEmailVerificationSchema = z.object({
-  body: z.object({}).strict(),
+  body: z
+    .object({
+      email: z.string().email("Invalid email address").optional(),
+    })
+    .strict(),
 });
 
 export const verifyEmailSchema = z.object({
@@ -11,6 +15,7 @@ export const verifyEmailSchema = z.object({
         .string()
         .length(6, "OTP must be exactly 6 digits")
         .regex(/^\d+$/, "OTP must contain only digits"),
+      email: z.string().email("Invalid email address").optional(),
     })
     .strict(),
 });

@@ -243,6 +243,13 @@ router.post("/register", validateRequest(registerSchema), createUser);
 router.post("/login", login);
 router.post("/refresh-token", refreshAccessToken);
 
+// Email verification routes - Public endpoint for new users, protected endpoints for logged-in users
+router.post(
+  "/verify-email",
+  validateRequest(emailVerificationValidator.verifyEmailSchema),
+  emailVerificationController.verifyEmail,
+);
+
 // Protected routes (require authentication)
 router.post("/logout", authenticate, logout);
 
@@ -254,13 +261,6 @@ router.post(
   emailVerificationController.requestEmailVerification,
 );
 
-router.post(
-  "/verify-email",
-  authenticate,
-  validateRequest(emailVerificationValidator.verifyEmailSchema),
-  emailVerificationController.verifyEmail,
-);
-
 router.get(
   "/verify-email/status",
   authenticate,
@@ -269,7 +269,6 @@ router.get(
 
 router.post(
   "/verify-email/resend",
-  authenticate,
   validateRequest(emailVerificationValidator.requestEmailVerificationSchema),
   emailVerificationController.resendOTP,
 );

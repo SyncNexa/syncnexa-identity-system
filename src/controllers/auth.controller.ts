@@ -8,6 +8,7 @@ import * as loginSecurityService from "../services/loginSecurity.service.js";
 import * as activityService from "../services/activity.service.js";
 import * as emailVerificationService from "../services/emailVerification.service.js";
 import * as sessionService from "../services/session.service.js";
+import * as verificationCenterService from "../services/verificationCenter.service.js";
 import { sendWelcomeEmail } from "../utils/email.js";
 import {
   DuplicateEmailError,
@@ -47,6 +48,21 @@ export async function createUser(
         );
         // Don't fail the registration if email sending fails
         // User can request OTP later
+      }
+
+      // Auto-check email verification status for students
+      if (result.user_role === "student") {
+        try {
+          await verificationCenterService.checkAndUpdateEmailVerification(
+            result.id,
+          );
+        } catch (err) {
+          console.error(
+            "[VERIFICATION] Error checking email verification status:",
+            err,
+          );
+          // Don't fail registration if this fails
+        }
       }
 
       // Enrich student data with full institution/faculty names if student role
@@ -91,7 +107,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
     const newAccessToken = generateAccessToken({
       id: user?.id,
       email: user?.email,
-      role: user?.role,
+      user_role: user?.role,
     });
 
     return sendSuccess(200, "Access token refreshed!", res, {
@@ -175,14 +191,12 @@ export async function login(req: Request, res: Response) {
           },
         });
 
-        if (attemptsLeft > 0) {
-          await loginSecurityService.sendFailedLoginAlert(
-            email,
-            ipAddress,
-            userAgent,
-            attemptsLeft,
-          );
-        }
+        await loginSecurityService.sendFailedLoginAlert(
+          email,
+          ipAddress,
+          userAgent,
+          attemptsLeft,
+        );
 
         if (shouldBan) {
           const timeFormatted = loginSecurityService.formatBanDuration(
@@ -241,6 +255,12 @@ export async function login(req: Request, res: Response) {
       user_agent: userAgent,
     });
 
+    await loginSecurityService.sendSuccessfulLoginAlert(
+      user.email,
+      ipAddress,
+      userAgent,
+    );
+
     // Create a session for device tracking
     const sessionResult = await sessionService.createSession({
       userId: user.id,
@@ -252,7 +272,7 @@ export async function login(req: Request, res: Response) {
     const accessToken = generateAccessToken({
       id: user?.id,
       email: user?.email,
-      role: user?.role,
+      user_role: user?.role,
     });
 
     const refreshToken = await generateRefreshToken(user?.id);

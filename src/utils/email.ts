@@ -1,11 +1,59 @@
 import transporter from "../config/email.js";
 import { environment } from "../config/env.js";
+import fs from "fs";
+import path from "path";
 
 interface EmailOptions {
   to: string;
   subject: string;
   html?: string;
   text?: string;
+}
+
+const logoPaths = [
+  path.resolve(process.cwd(), "src/public/logo.svg"),
+  path.resolve(process.cwd(), "public/logo.svg"),
+  path.resolve(process.cwd(), "dist/public/logo.svg"),
+];
+
+let cachedLogoHtml: string | null = null;
+let cachedLogoAttachment: {
+  filename: string;
+  content: Buffer;
+  cid: string;
+  contentType: string;
+} | null = null;
+
+function getLogoAttachment() {
+  if (cachedLogoAttachment) return cachedLogoAttachment;
+
+  for (const logoPath of logoPaths) {
+    if (fs.existsSync(logoPath)) {
+      const svgBuffer = fs.readFileSync(logoPath);
+      cachedLogoAttachment = {
+        filename: "logo.svg",
+        content: svgBuffer,
+        cid: "syncnexa-logo",
+        contentType: "image/svg+xml",
+      };
+      return cachedLogoAttachment;
+    }
+  }
+
+  return null;
+}
+
+function getLogoHtml(): string {
+  if (cachedLogoHtml) return cachedLogoHtml;
+
+  const logoAttachment = getLogoAttachment();
+  if (logoAttachment) {
+    cachedLogoHtml = `<img src="cid:${logoAttachment.cid}" alt="SyncNexa" class="logo-img" />`;
+    return cachedLogoHtml;
+  }
+
+  cachedLogoHtml = "SyncNexa";
+  return cachedLogoHtml;
 }
 
 /**
@@ -31,12 +79,15 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       return true;
     }
 
+    const logoAttachment = getLogoAttachment();
+
     const result = await transporter.sendMail({
       from: fromEmail,
       to: options.to,
       subject: options.subject,
       html: options.html,
       text: options.text,
+      attachments: logoAttachment ? [logoAttachment] : undefined,
     });
 
     console.log("[EMAIL] Email sent successfully:", result.messageId);
@@ -84,6 +135,21 @@ export async function sendEmailVerificationOTP(
             font-weight: bold;
             color: #1f2937;
             margin-bottom: 10px;
+          }
+          .logo-img {
+            height: 40px;
+            max-width: 160px;
+            display: inline-block;
+          }
+          .logo-img {
+            height: 40px;
+            max-width: 160px;
+            display: inline-block;
+          }
+          .logo-img {
+            height: 40px;
+            max-width: 160px;
+            display: inline-block;
           }
           .title {
             font-size: 28px;
@@ -139,7 +205,7 @@ export async function sendEmailVerificationOTP(
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">SyncNexa</div>
+            <div class="logo">${getLogoHtml()}</div>
             <h1 class="title">Verify Your Email</h1>
           </div>
           
@@ -292,7 +358,7 @@ export async function sendPasswordResetEmail(
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">SyncNexa</div>
+            <div class="logo">${getLogoHtml()}</div>
             <h1 class="title">Reset Your Password</h1>
           </div>
           
@@ -413,7 +479,7 @@ export async function sendWelcomeEmail(
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">SyncNexa</div>
+            <div class="logo">${getLogoHtml()}</div>
             <h1 class="title">Welcome to SyncNexa!</h1>
           </div>
           
@@ -456,6 +522,170 @@ This is an automated message, please do not reply to this email.
   return sendEmail({
     to: email,
     subject: "Welcome to SyncNexa!",
+    html,
+    text,
+  });
+}
+
+/**
+ * Send successful login alert
+ */
+export async function sendSuccessfulLoginAttemptEmail(
+  email: string,
+  ipAddress: string,
+  userAgent: string,
+): Promise<boolean> {
+  const timestamp = new Date().toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+          }
+          .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+          }
+          .logo-img {
+            height: 40px;
+            max-width: 160px;
+            display: inline-block;
+          }
+          .title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #16a34a;
+            margin: 20px 0;
+          }
+          .message {
+            font-size: 16px;
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 20px;
+          }
+          .details-box {
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .detail-row:last-child {
+            border-bottom: none;
+          }
+          .detail-label {
+            font-weight: 600;
+            color: #6b7280;
+          }
+          .detail-value {
+            color: #1f2937;
+            text-align: right;
+            max-width: 60%;
+            word-wrap: break-word;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 12px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">${getLogoHtml()}</div>
+            <h1 class="title">New Login Detected</h1>
+          </div>
+
+          <p class="message">
+            We detected a successful login to your SyncNexa account. If this was you, no action is required.
+          </p>
+
+          <div class="details-box">
+            <div class="detail-row">
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">${timestamp}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">IP Address:</span>
+              <span class="detail-value">${ipAddress}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Device:</span>
+              <span class="detail-value">${userAgent}</span>
+            </div>
+          </div>
+
+          <p class="message">
+            <strong>If this wasn't you:</strong> Change your password immediately and contact support.
+          </p>
+
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} SyncNexa. All rights reserved.</p>
+            <p>This is an automated security alert. Please do not reply to this email.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+SyncNexa - Successful Login Alert
+
+We detected a successful login to your SyncNexa account.
+
+LOGIN DETAILS:
+- Time: ${timestamp}
+- IP Address: ${ipAddress}
+- Device: ${userAgent}
+
+If this wasn't you: Change your password immediately and contact support.
+
+© ${new Date().getFullYear()} SyncNexa. All rights reserved.
+This is an automated security alert. Please do not reply to this email.
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: "Security Alert: New Login Detected",
     html,
     text,
   });
@@ -552,6 +782,11 @@ export async function sendFailedLoginAttemptEmail(
             max-width: 60%;
             word-wrap: break-word;
           }
+          .logo-img {
+            height: 40px;
+            max-width: 160px;
+            display: inline-block;
+          }
           .warning {
             background-color: #fef3c7;
             border-left: 4px solid #f59e0b;
@@ -600,7 +835,7 @@ export async function sendFailedLoginAttemptEmail(
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">SyncNexa</div>
+            <div class="logo">${getLogoHtml()}</div>
             <div class="alert-icon">⚠️</div>
             <h1 class="title">Failed Login Attempt</h1>
           </div>

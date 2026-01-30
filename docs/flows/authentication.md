@@ -260,7 +260,8 @@ Complete documentation for user authentication, registration, and session manage
   "data": {
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoiam9obi5kb2VAZXhhbXBsZS5jb20iLCJyb2xlIjoidmlzaXRvciIsImlhdCI6MTY0MjAwMDAwMCwiZXhwIjoxNjQyMDA5MDAwfQ.signature",
     "refreshToken": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
-    "role": "visitor"
+    "role": "visitor",
+    "sessionId": "session-uuid-123"
   }
 }
 ```
@@ -278,6 +279,12 @@ Complete documentation for user authentication, registration, and session manage
 - **Expiration:** 7 days
 - **Usage:** Use to obtain new access tokens via `/auth/refresh-token` endpoint
 - **Storage:** Store securely (httpOnly cookie recommended for web apps)
+
+**Session ID:**
+
+- **Expiration:** 7 days (same as refresh token)
+- **Usage:** Used to track device sessions and for logout. Send this along with refresh token when logging out
+- **Storage:** Store alongside tokens for session management
 
 ### Error Responses
 
@@ -408,25 +415,27 @@ Complete documentation for user authentication, registration, and session manage
 
 **Name:** Logout User
 
-**Description:** Invalidates the user's refresh token, effectively logging them out. The access token remains valid until its expiration (15 minutes), but no new access tokens can be generated with the invalidated refresh token. For complete logout, the client should also discard the access token locally.
+**Description:** Invalidates the user's refresh token and optionally revokes the current session, effectively logging them out. The access token remains valid until its expiration (15 minutes), but no new access tokens can be generated with the invalidated refresh token. For complete logout, the client should also discard the access token locally.
 
 **Route:** `POST /auth/logout`
 
-**Authentication Required:** No (but requires refresh token to revoke)
+**Authentication Required:** Yes (Bearer token)
 
 ### Request Payload
 
 ```json
 {
-  "refreshToken": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d"
+  "refreshToken": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+  "sessionId": "session-uuid-123"
 }
 ```
 
 ### Payload Field Requirements
 
-| Field        | Type   | Required | Description                     |
-| ------------ | ------ | -------- | ------------------------------- |
-| refreshToken | string | Yes      | The refresh token to invalidate |
+| Field        | Type   | Required | Description                         |
+| ------------ | ------ | -------- | ----------------------------------- |
+| refreshToken | string | Yes      | The refresh token to invalidate     |
+| sessionId    | string | No       | The session ID to revoke (optional) |
 
 ### Success Response (200 OK)
 
@@ -439,7 +448,7 @@ Complete documentation for user authentication, registration, and session manage
 }
 ```
 
-**What Happens:** The refresh token is deleted from the database. The user's access token remains valid until expiration but cannot be renewed. The client should discard both tokens locally.
+**What Happens:** The refresh token is deleted from the database. If a sessionId is provided, that session is also revoked. The user's access token remains valid until expiration but cannot be renewed. The client should discard both tokens locally. User activity is logged for security audit.
 
 ### Error Responses
 

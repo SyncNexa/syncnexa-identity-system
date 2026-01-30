@@ -2,6 +2,7 @@ import type { RowDataPacket } from "mysql2";
 import pool from "../config/db.js";
 import bcrypt from "bcrypt";
 import { generateUUID } from "../utils/uuid.js";
+import { initializePillarsForUser } from "./verificationPillar.model.js";
 
 // Custom error classes for duplicate entry errors
 export class DuplicateEmailError extends Error {
@@ -92,6 +93,9 @@ export async function createNewUser(user: any) {
           academicInfo.graduation_year || null,
         ],
       );
+
+      // Initialize verification pillars for student
+      await initializePillarsForUser(userId);
     }
 
     await client.commit();

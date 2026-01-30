@@ -12,6 +12,7 @@ import * as institutionController from "../controllers/institution.controller.js
 import * as studentCardController from "../controllers/studentCard.controller.js";
 import * as shareableLinkController from "../controllers/shareableLink.controller.js";
 import * as verificationController from "../controllers/verification.controller.js";
+import * as verificationCenterController from "../controllers/verificationCenter.controller.js";
 import * as portfolioController from "../controllers/portfolio.controller.js";
 import * as cvController from "../controllers/cv.controller.js";
 import * as sessionController from "../controllers/session.controller.js";
@@ -20,6 +21,7 @@ import * as dashboardController from "../controllers/dashboard.controller.js";
 import studentValidator from "../validators/student.validator.js";
 import academicValidator from "../validators/academic.validator.js";
 import verificationValidator from "../validators/verification.validator.js";
+import verificationCenterValidator from "../validators/verificationCenter.validator.js";
 import shareableLinkValidator from "../validators/shareableLink.validator.js";
 import institutionValidator from "../validators/institution.validator.js";
 import studentCardValidator from "../validators/studentCard.validator.js";
@@ -270,6 +272,42 @@ router.get(
   authorizeRoles("student"),
   validateRequest(dashboardValidator.getDashboardSchema),
   dashboardController.getStudentOverview,
+);
+
+// Verification Center (New 4-Pillar System)
+router.get(
+  "/verification-center",
+  authorizeRoles("student"),
+  validateRequest(verificationCenterValidator.getVerificationCenterSchema),
+  verificationCenterController.getVerificationCenter,
+);
+
+router.get(
+  "/verification-center/pillar/:pillar",
+  authorizeRoles("student"),
+  validateRequest(verificationCenterValidator.getPillarSchema),
+  verificationCenterController.getVerificationPillar,
+);
+
+router.patch(
+  "/verification-center/step/:stepId/status",
+  authorizeRoles("student"),
+  validateRequest(verificationCenterValidator.updateStepStatusSchema),
+  verificationCenterController.updateStepStatus,
+);
+
+router.post(
+  "/verification-center/step/:stepId/retry",
+  authorizeRoles("student"),
+  validateRequest(verificationCenterValidator.retryStepSchema),
+  verificationCenterController.retryVerificationStep,
+);
+
+router.post(
+  "/verification-center/admin/step/:stepId/review",
+  authorizeRoles("staff"),
+  validateRequest(verificationCenterValidator.adminReviewStepSchema),
+  verificationCenterController.adminReviewStep,
 );
 
 // Attach multer and validation to upload endpoints

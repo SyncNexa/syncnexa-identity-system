@@ -11,7 +11,9 @@ import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import appsRoutes from "./routes/apps.route.js";
 import sauthRoutes from "./routes/sauth.route.js";
+import securityRoutes from "./routes/security.route.js";
 import { markdownToHtml, getDocPath } from "./utils/docsServer.js";
+import { initializeVerificationForExistingStudents } from "./services/verificationInitializer.service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -59,7 +61,16 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/apps", appsRoutes);
 app.use("/api/v1/sauth", sauthRoutes);
+app.use("/api/v1/security", securityRoutes);
 
 app.use(errorHandler);
+
+// Initialize verification pillars for existing students (non-blocking)
+initializeVerificationForExistingStudents().catch((err) => {
+  console.error(
+    "[VERIFICATION] Failed to initialize verification on startup:",
+    err,
+  );
+});
 
 export default app;

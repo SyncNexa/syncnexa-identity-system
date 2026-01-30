@@ -26,7 +26,7 @@ export function loadNavigation(docsDir: string): NavSection[] {
  */
 export function generateSidebar(
   nav: NavSection[],
-  currentPath: string
+  currentPath: string,
 ): string {
   let html = '<nav class="sidebar">\n';
   html += '  <div class="sidebar-header">\n';
@@ -60,9 +60,27 @@ export function generateSidebar(
 export async function markdownToHtml(
   filePath: string,
   docsDir: string,
-  currentPath: string
+  currentPath: string,
 ): Promise<string> {
   const content = fs.readFileSync(filePath, "utf-8");
+  const renderer = new marked.Renderer();
+  const headingIds = new Map<string, number>();
+
+  renderer.heading = ({ text, depth }) => {
+    const baseId = text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+
+    const count = (headingIds.get(baseId) || 0) + 1;
+    headingIds.set(baseId, count);
+    const id = count === 1 ? baseId : `${baseId}-${count}`;
+
+    return `<h${depth} id="${id}"><a class="heading-anchor" href="#${id}">${text}</a></h${depth}>`;
+  };
+
+  marked.setOptions({ renderer });
   const html = await marked(content);
   const nav = loadNavigation(docsDir);
   const sidebar = generateSidebar(nav, currentPath);
@@ -190,6 +208,30 @@ export async function markdownToHtml(
       color: #000;
       margin-top: 20px;
       margin-bottom: 10px;
+    }
+
+    main .heading-anchor {
+      color: inherit;
+      text-decoration: none;
+      position: relative;
+    }
+
+    main .heading-anchor::after {
+      content: "#";
+      font-weight: 600;
+      margin-left: 8px;
+      color: var(--primary);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    main h1:hover .heading-anchor::after,
+    main h2:hover .heading-anchor::after,
+    main h3:hover .heading-anchor::after,
+    main h4:hover .heading-anchor::after,
+    main h5:hover .heading-anchor::after,
+    main h6:hover .heading-anchor::after {
+      opacity: 1;
     }
 
     main p {

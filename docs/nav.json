@@ -86,6 +86,14 @@
         "path": "api/email-verification"
       },
       {
+        "label": "Verification Center",
+        "path": "api/verification-center"
+      },
+      {
+        "label": "Security",
+        "path": "api/security"
+      },
+      {
         "label": "Universities & Faculties",
         "path": "api/universities"
       }

@@ -3,6 +3,7 @@ import metricsModel from "../models/metrics.model.js";
 import * as userModel from "../models/user.model.js";
 import * as studentModel from "../models/academic.model.js";
 import * as studentCardModel from "../models/studentCard.model.js";
+import * as verificationCenterService from "./verificationCenter.service.js";
 
 export async function calculateProfileCompletion(userId: number | string) {
   try {
@@ -145,12 +146,6 @@ export async function getDashboardMetrics(userId: number | string) {
     return null;
   }
 }
-
-export default {
-  calculateProfileCompletion,
-  getProgressSuggestions,
-  getDashboardMetrics,
-};
 
 /**
  * Get comprehensive student overview
@@ -301,3 +296,24 @@ export async function getStudentOverview(userId: number | string) {
     return null;
   }
 }
+/**
+ * Get comprehensive verification center overview with 4-pillar system
+ */
+export async function getVerificationCenterOverview(userId: number | string) {
+  try {
+    return await verificationCenterService.getVerificationCenter(
+      userId as string,
+    );
+  } catch (err) {
+    console.error("Error getting verification center overview:", err);
+    return null;
+  }
+}
+
+export default {
+  calculateProfileCompletion,
+  getProgressSuggestions,
+  getDashboardMetrics,
+  getStudentOverview,
+  getVerificationCenterOverview,
+};

@@ -1,5 +1,8 @@
 import redis from "../config/redis.js";
-import { sendFailedLoginAttemptEmail } from "../utils/email.js";
+import {
+  sendFailedLoginAttemptEmail,
+  sendSuccessfulLoginAttemptEmail,
+} from "../utils/email.js";
 
 /**
  * Login Security Service
@@ -168,6 +171,23 @@ export async function sendFailedLoginAlert(
     console.log(`[SECURITY] Failed login alert sent to ${email}`);
   } catch (err) {
     console.error("[SECURITY] Error sending failed login alert:", err);
+    // Don't throw - email failure shouldn't block login flow
+  }
+}
+
+/**
+ * Send security alert email for successful login
+ */
+export async function sendSuccessfulLoginAlert(
+  email: string,
+  ipAddress: string,
+  userAgent: string,
+): Promise<void> {
+  try {
+    await sendSuccessfulLoginAttemptEmail(email, ipAddress, userAgent);
+    console.log(`[SECURITY] Successful login alert sent to ${email}`);
+  } catch (err) {
+    console.error("[SECURITY] Error sending successful login alert:", err);
     // Don't throw - email failure shouldn't block login flow
   }
 }

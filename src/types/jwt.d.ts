@@ -7,5 +7,5 @@ interface JwtPayload {
 interface TokenPayload {
   id: string;
   email: string;
-  role: "student" | "developer" | "staff";
+  user_role: "student" | "developer" | "staff";
 }

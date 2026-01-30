@@ -66,9 +66,30 @@ export async function getStudentOverview(req: Request, res: Response) {
   }
 }
 
+export async function getVerificationCenterOverview(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const userId = (req.user as any)?.id;
+    if (!userId) return sendError(400, "user id required", res);
+
+    const overview =
+      await dashboardService.getVerificationCenterOverview(userId);
+    if (!overview)
+      return sendError(500, "Failed to fetch verification center", res);
+
+    return sendSuccess(200, "Verification center overview", res, overview);
+  } catch (err) {
+    console.error(err);
+    return sendError(500, "Failed to fetch verification center", res);
+  }
+}
+
 export default {
   getDashboard,
   getProgress,
   getSuggestions,
   getStudentOverview,
+  getVerificationCenterOverview,
 };

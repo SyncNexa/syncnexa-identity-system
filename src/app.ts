@@ -25,7 +25,13 @@ app.set("trust proxy", true);
 app.use(helmet());
 app.use(compression());
 app.use(requestLogger);
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      req.rawBody = buf.toString("utf8");
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 
 // Serve developer docs (markdown → HTML) locally; disable with ENABLE_LOCAL_DOCS=false

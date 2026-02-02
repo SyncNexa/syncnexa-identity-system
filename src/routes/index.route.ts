@@ -9,6 +9,9 @@ import {
 import { getDegreesForInstitution } from "../utils/degrees.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import { validateRequest } from "../middlewares/validateRequest.middleware.js";
+import * as schoolVerificationController from "../controllers/schoolVerification.controller.js";
+import schoolVerificationValidator from "../validators/schoolVerification.validator.js";
 import adminRoutes from "./admin/index.route.js";
 
 const router = express.Router();
@@ -24,6 +27,13 @@ router.get("/health", (req, res) => {
 
   return sendSuccess(200, "Server is healthy", res);
 });
+
+// School verification callback (public)
+router.post(
+  "/verify/callback/:requestId",
+  validateRequest(schoolVerificationValidator.schoolVerificationCallbackSchema),
+  schoolVerificationController.handleSchoolVerificationCallback,
+);
 
 // Public endpoint to fetch universities filtered by region/country
 router.get("/universities", (req, res) => {

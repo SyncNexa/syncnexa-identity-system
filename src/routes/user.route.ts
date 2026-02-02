@@ -9,6 +9,7 @@ import * as studentsController from "../controllers/students.controller.js";
 import * as activityController from "../controllers/activity.controller.js";
 import * as academicController from "../controllers/academic.controller.js";
 import * as institutionController from "../controllers/institution.controller.js";
+import * as schoolVerificationController from "../controllers/schoolVerification.controller.js";
 import * as studentCardController from "../controllers/studentCard.controller.js";
 import * as shareableLinkController from "../controllers/shareableLink.controller.js";
 import * as verificationController from "../controllers/verification.controller.js";
@@ -24,6 +25,7 @@ import verificationValidator from "../validators/verification.validator.js";
 import verificationCenterValidator from "../validators/verificationCenter.validator.js";
 import shareableLinkValidator from "../validators/shareableLink.validator.js";
 import institutionValidator from "../validators/institution.validator.js";
+import schoolVerificationValidator from "../validators/schoolVerification.validator.js";
 import studentCardValidator from "../validators/studentCard.validator.js";
 import portfolioValidator from "../validators/portfolio.validator.js";
 import cvValidator from "../validators/cv.validator.js";
@@ -93,6 +95,14 @@ router.patch(
   authorizeRoles("staff"),
   validateRequest(institutionValidator.updateInstitutionVerificationSchema),
   institutionController.updateRequest,
+);
+
+// School API verification (student-initiated)
+router.post(
+  "/school-verification",
+  authorizeRoles("student"),
+  validateRequest(schoolVerificationValidator.initiateSchoolVerificationSchema),
+  schoolVerificationController.initiateSchoolVerification,
 );
 
 // Student cards (digital)

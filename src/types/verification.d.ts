@@ -90,7 +90,7 @@ interface PersonalInfoSteps {
 }
 
 interface AcademicInfoSteps {
-  program_validation: VerificationStep;
+  degree_validation: VerificationStep;
   enrollment_logic_check: VerificationStep;
 }
 

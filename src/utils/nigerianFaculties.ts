@@ -321,4 +321,58 @@ export const NIGERIAN_FACULTIES: Record<string, Faculty[]> = {
       ],
     },
   ],
+  OPS_NG: [
+    {
+      code: "OPS_BM_NG",
+      name: "School of Business & Management",
+      departments: [
+        "Accountancy",
+        "Banking and Finance",
+        "Insurance",
+        "Business Administration & Management",
+        "Public Administration",
+        "Local Government & Development Studies",
+      ],
+    },
+    {
+      code: "OPS_ST_NG",
+      name: "School of Science & Technology",
+      departments: [
+        "Computer Science",
+        "Science Laboratory Technology",
+        "Mathematics & Statistics",
+        "Food Science Technology",
+        "Agricultural Technology",
+        "Animal Health and Production Technology",
+        "Horticultural Technology",
+        "Crop Production Technology",
+        "Soil Science Technology",
+      ],
+    },
+    {
+      code: "OPS_ENG_NG",
+      name: "School of Engineering & Technology",
+      departments: [
+        "Agricultural & Bio-Environmental Engineering Technology",
+        "Civil Engineering Technology",
+        "Mechanical Engineering Technology",
+        "Electrical/Electronics Engineering",
+        "Welding and Fabrication Engineering",
+      ],
+    },
+    {
+      code: "OPS_ENV_NG",
+      name: "School of Environmental & Built Environment",
+      departments: [
+        "Architectural Technology",
+        "Building Technology",
+        "Estate Management & Valuation",
+        "Quantity Surveying",
+        "Transport Planning & Management",
+        "Urban & Regional Planning",
+        "Surveying & Geo-Informatics",
+        "Library and Information Science",
+      ],
+    },
+  ],
 };

@@ -3,11 +3,11 @@ import { z } from "zod";
 export const addAcademicSchema = z.object({
   body: z.object({
     institution: z.string(),
-    program: z.string().optional(),
+    degree: z.string().optional(),
     matric_number: z.string().optional(),
     start_date: z.string().optional(),
     end_date: z.string().optional(),
-    degree: z.string().optional(),
+    degree_type: z.string().optional(),
     gpa: z.string().optional(),
     meta: z.any().optional(),
   }),
@@ -18,11 +18,11 @@ export const addAcademicSchema = z.object({
 export const updateAcademicSchema = z.object({
   body: z.object({
     institution: z.string().optional(),
-    program: z.string().optional(),
+    degree: z.string().optional(),
     matric_number: z.string().optional(),
     start_date: z.string().optional(),
     end_date: z.string().optional(),
-    degree: z.string().optional(),
+    degree_type: z.string().optional(),
     gpa: z.string().optional(),
     meta: z.any().optional(),
   }),

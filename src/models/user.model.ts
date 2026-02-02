@@ -79,7 +79,7 @@ export async function createNewUser(user: any) {
       }
 
       await client.query(
-        `INSERT INTO students (user_id, institution, matric_number, department, faculty, program, student_level, admission_year, graduation_year)
+        `INSERT INTO students (user_id, institution, matric_number, department, faculty, degree, student_level, admission_year, graduation_year)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           userId,
@@ -87,7 +87,7 @@ export async function createNewUser(user: any) {
           matric,
           academicInfo.department || null,
           academicInfo.faculty || null,
-          academicInfo.program || null,
+          academicInfo.degree || null,
           academicInfo.student_level || null,
           academicInfo.admission_year || null,
           academicInfo.graduation_year || null,

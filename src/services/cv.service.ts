@@ -25,8 +25,8 @@ function renderHtml(data: any) {
   <body>
     <h1>${user?.first_name || user?.firstName || user?.email}</h1>
     <div class="meta">${user?.user_email || user?.email || ""} • ${
-    user?.user_phone || user?.phone || ""
-  }</div>
+      user?.user_phone || user?.phone || ""
+    }</div>
 
     <div class="section">
       <h2>Academic Records</h2>
@@ -36,12 +36,12 @@ function renderHtml(data: any) {
               .map(
                 (a: any) =>
                   `<li><strong>${a.institution}</strong> — ${
-                    a.degree || a.program || ""
+                    a.degree_type || a.degree || ""
                   } ${
                     a.matric_number ? `(${a.matric_number})` : ""
                   }<br/><small class=\"meta\">${a.start_date || ""} — ${
                     a.end_date || ""
-                  }</small></li>`
+                  }</small></li>`,
               )
               .join("")}</ul>`
           : "<p>No academic records.</p>"
@@ -59,7 +59,7 @@ function renderHtml(data: any) {
                     d.filename
                   } <small class=\"meta\">${
                     d.is_verified ? "Verified" : "Unverified"
-                  }</small></li>`
+                  }</small></li>`,
               )
               .join("")}</ul>`
           : "<p>No documents.</p>"
@@ -78,10 +78,10 @@ function renderHtml(data: any) {
                   }</div>${
                     p.links
                       ? `<div><small class=\"meta\">Links: ${JSON.stringify(
-                          p.links
+                          p.links,
                         )}</small></div>`
                       : ""
-                  }</li>`
+                  }</li>`,
               )
               .join("")}</ul>`
           : "<p>No projects.</p>"
@@ -99,7 +99,7 @@ function renderHtml(data: any) {
                     c.issuer
                   } <small class=\"meta\">${c.issue_date || ""} • ${
                     c.is_verified ? "Verified" : "Unverified"
-                  }</small></li>`
+                  }</small></li>`,
               )
               .join("")}</ul>`
           : "<p>No certificates.</p>"
@@ -115,7 +115,7 @@ function renderHtml(data: any) {
                 (c: any) =>
                   `<li>Card: ${c.card_uuid} <small class=\"meta\">Active: ${
                     c.is_active ? "Yes" : "No"
-                  }</small></li>`
+                  }</small></li>`,
               )
               .join("")}</ul>`
           : "<p>No cards.</p>"

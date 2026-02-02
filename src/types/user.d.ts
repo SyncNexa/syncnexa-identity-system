@@ -22,7 +22,7 @@ interface Student extends User {
   matric_number: string;
   department?: string;
   faculty?: string;
-  program?: string;
+  degree?: string;
   level?: string;
   graduation_year?: number;
   is_institution_verified?: boolean;

@@ -51,9 +51,7 @@ export async function getUserVerificationStatus(userId: number | string) {
   // derive overall status: if any approved -> approved, else if any pending -> pending, else rejected or none
   if (!rows || !rows.length) return { overall: "none", documents: [] };
   const docs = rows.map((r: any) => ({ ...r }));
-  const statuses = docs.map(
-    (d: any) => d.verification_status || (d.is_verified ? "approved" : "none"),
-  );
+  const statuses = docs.map((d: any) => d.verification_status || "none");
   if (statuses.includes("approved"))
     return { overall: "approved", documents: docs };
   if (statuses.includes("pending"))

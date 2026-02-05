@@ -61,7 +61,8 @@ export async function createNewUser(user: any) {
       gender: user.gender,
       phone: user.phone,
       user_role: userRole,
-      is_verified: false,
+      email_verified: false,
+      email_status: "pending",
       account_status: "active",
     } as any;
 
@@ -171,9 +172,10 @@ export async function markUserVerified(id: string) {
     if (row.length == 0) {
       return null;
     }
-    await client.query(`UPDATE users SET is_verified = TRUE WHERE id = ?`, [
-      id,
-    ]);
+    await client.query(
+      `UPDATE users SET email_verified = TRUE, email_status = 'verified' WHERE id = ?`,
+      [id],
+    );
 
     const [result] = await client.query<RowDataPacket[]>(
       `SELECT * FROM users WHERE id = ?`,

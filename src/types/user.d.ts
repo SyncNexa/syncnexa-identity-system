@@ -9,7 +9,10 @@ interface User {
   user_state?: string | null;
   user_address?: string | null;
   gender?: "male" | "female" | "custom" | null;
-  is_verified: boolean;
+  email_verified: boolean;
+  email_status: "pending" | "verified" | "failed";
+  phone_verified?: boolean;
+  phone_status?: "pending" | "verified" | "failed";
   profile_image?: string | null;
   user_role: "student" | "developer" | "staff";
   account_status: "active" | "suspended" | "deactivated";

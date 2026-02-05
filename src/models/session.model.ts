@@ -120,6 +120,19 @@ export async function updateSessionActivity(id: number | string) {
   }
 }
 
+export async function getSessionById(id: number | string) {
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT * FROM user_sessions WHERE id = ?`,
+      [id],
+    );
+    return rows[0] || null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
 export default {
   createSession,
   findSessionByToken,
@@ -127,4 +140,5 @@ export default {
   revokeAllUserSessions,
   getActiveSessions,
   updateSessionActivity,
+  getSessionById,
 };

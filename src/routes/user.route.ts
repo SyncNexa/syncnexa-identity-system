@@ -48,6 +48,12 @@ router.get(
   authorizeRoles("student"),
   studentsController.getPersonalInfo,
 );
+router.patch(
+  "/personal-info",
+  authorizeRoles("student"),
+  validateRequest(studentValidator.updatePersonalInfoSchema),
+  studentsController.updatePersonalInfo,
+);
 router.get(
   "/academic-details",
   authorizeRoles("student"),

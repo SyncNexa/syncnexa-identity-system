@@ -69,6 +69,10 @@
         "path": "student/personal-info"
       },
       {
+        "label": "Update Personal Information",
+        "path": "student/update-personal-info"
+      },
+      {
         "label": "Academic Details",
         "path": "student/academic-details"
       },

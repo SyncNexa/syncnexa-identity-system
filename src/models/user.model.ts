@@ -282,3 +282,46 @@ export async function getStudentAcademicDetails(userId: string) {
   );
   return rows[0] || null;
 }
+
+export async function updateUserPersonalInfo(
+  userId: string,
+  updates: {
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    phone?: string;
+    user_address?: string;
+    gender?: string;
+    linked_id?: string;
+  },
+): Promise<boolean> {
+  const allowedFields = [
+    "first_name",
+    "last_name",
+    "email",
+    "phone",
+    "user_address",
+    "gender",
+    "linked_id",
+  ];
+  const fieldsToUpdate = Object.keys(updates).filter((key) =>
+    allowedFields.includes(key),
+  );
+
+  if (fieldsToUpdate.length === 0) {
+    return true; // No fields to update
+  }
+
+  const setClauses = fieldsToUpdate.map((field) => `${field} = ?`).join(", ");
+  const values = fieldsToUpdate.map(
+    (field) => updates[field as keyof typeof updates],
+  );
+  values.push(userId);
+
+  const [result] = await pool.query(
+    `UPDATE users SET ${setClauses} WHERE id = ?`,
+    values,
+  );
+
+  return (result as any).affectedRows > 0;
+}

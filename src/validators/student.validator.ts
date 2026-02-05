@@ -35,9 +35,23 @@ export const getVerificationStatusSchema = z.object({
   params: z.any(),
 });
 
+export const updatePersonalInfoSchema = z.object({
+  body: z.object({
+    firstName: z.string().min(1).max(100).optional(),
+    lastName: z.string().min(1).max(100).optional(),
+    email: z.string().email().optional(),
+    phoneNumber: z.string().min(7).max(20).optional(),
+    address: z.string().max(255).optional(),
+    gender: z.enum(["male", "female", "other"]).optional(),
+  }),
+  query: z.any(),
+  params: z.any(),
+});
+
 export default {
   uploadDocumentSchema,
   updateDocumentSchema,
   requestVerificationSchema,
   getVerificationStatusSchema,
+  updatePersonalInfoSchema,
 };

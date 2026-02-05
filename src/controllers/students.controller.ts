@@ -119,6 +119,25 @@ export async function getPersonalInfo(req: Request, res: Response) {
   }
 }
 
+export async function updatePersonalInfo(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(400, "user_id required", res);
+
+    const personalInfo = await studentService.updatePersonalInfo(
+      userId as string,
+      req.body,
+    );
+    if (!personalInfo)
+      return sendError(404, "Personal information not found", res);
+
+    return sendSuccess(200, "Personal information updated", res, personalInfo);
+  } catch (err) {
+    console.error(err);
+    return sendError(500, "Could not update personal information", res);
+  }
+}
+
 export async function getMe(req: Request, res: Response) {
   try {
     const userId = req.user?.id;
@@ -159,6 +178,7 @@ export default {
   setVerificationStatus,
   getVerificationStatus,
   getPersonalInfo,
+  updatePersonalInfo,
   getMe,
   getAcademicDetails,
 };

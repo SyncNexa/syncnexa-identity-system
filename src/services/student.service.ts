@@ -120,6 +120,55 @@ export async function getPersonalInfo(
   }
 }
 
+export async function updatePersonalInfo(
+  userId: string,
+  payload: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    address?: string;
+    gender?: string;
+  },
+): Promise<PersonalInfo | null> {
+  try {
+    // Build update object with correct database column names
+    const updates: any = {};
+    if (payload.firstName !== undefined) updates.first_name = payload.firstName;
+    if (payload.lastName !== undefined) updates.last_name = payload.lastName;
+    if (payload.email !== undefined) updates.email = payload.email;
+    if (payload.phoneNumber !== undefined) updates.phone = payload.phoneNumber;
+    if (payload.address !== undefined) updates.user_address = payload.address;
+    if (payload.gender !== undefined) updates.gender = payload.gender;
+
+    // Update in database
+    const updated = await userModel.updateUserPersonalInfo(userId, updates);
+    if (!updated) {
+      throw new Error("Failed to update personal information");
+    }
+
+    // Fetch and return updated personal info
+    const user = await userModel.getUserPersonalInfo(userId);
+    if (!user) {
+      return null;
+    }
+
+    return {
+      fullName: `${user.first_name} ${user.last_name}`,
+      email: user.email,
+      emailStatus: user.email_status as "pending" | "verified" | "failed",
+      phoneNumber: user.phone,
+      phoneStatus: user.phone_status as "pending" | "verified" | "failed",
+      address: user.user_address || "",
+      gender: user.gender as "male" | "female" | "other",
+      linkedId: user.linked_id || null,
+    };
+  } catch (error) {
+    console.error("Error updating personal info:", error);
+    throw error;
+  }
+}
+
 export async function getMe(userId: string): Promise<UserMe | null> {
   try {
     const user = await userModel.getUserBasicInfo(userId);
@@ -183,6 +232,7 @@ export default {
   setDocumentVerificationStatus,
   getUserVerificationStatus,
   getPersonalInfo,
+  updatePersonalInfo,
   getMe,
   getAcademicDetails,
 };

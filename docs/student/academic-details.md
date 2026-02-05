@@ -14,9 +14,9 @@ Requires a valid Bearer token. Only accessible by users with the `student` role.
 
 ## Headers
 
-| Header | Type | Required | Description |
-|--------|------|----------|-------------|
-| Authorization | string | Yes | Bearer token for authentication |
+| Header        | Type   | Required | Description                     |
+| ------------- | ------ | -------- | ------------------------------- |
+| Authorization | string | Yes      | Bearer token for authentication |
 
 ## Response Format
 
@@ -42,6 +42,7 @@ Requires a valid Bearer token. Only accessible by users with the `student` role.
 ### Error Responses
 
 #### 401 Unauthorized
+
 ```json
 {
   "status": "error",
@@ -52,6 +53,7 @@ Requires a valid Bearer token. Only accessible by users with the `student` role.
 ```
 
 #### 403 Forbidden
+
 ```json
 {
   "status": "error",
@@ -62,6 +64,7 @@ Requires a valid Bearer token. Only accessible by users with the `student` role.
 ```
 
 #### 404 Not Found
+
 ```json
 {
   "status": "error",
@@ -72,6 +75,7 @@ Requires a valid Bearer token. Only accessible by users with the `student` role.
 ```
 
 #### 500 Internal Server Error
+
 ```json
 {
   "status": "error",
@@ -83,15 +87,15 @@ Requires a valid Bearer token. Only accessible by users with the `student` role.
 
 ## Response Fields
 
-| Field | Type | Nullable | Description |
-|-------|------|----------|-------------|
-| institution | string | No | Name of the institution where the student is enrolled |
-| department | string | Yes | Student's department or faculty |
-| level | string | Yes | Current level/year of study (e.g., "100", "200", "300", "400", "500") |
-| program | string | Yes | Type of program: `secondary`, `undergraduate`, `postgraduate`, `diploma`, `certificate`, or `other` |
-| matricNumber | string | No | Student's unique matriculation or registration number |
-| admissionYear | number | Yes | Year the student was admitted (4-digit year) |
-| expectedGraduationYear | number | Yes | Expected year of graduation (4-digit year) |
+| Field                  | Type   | Nullable | Description                                                                                         |
+| ---------------------- | ------ | -------- | --------------------------------------------------------------------------------------------------- |
+| institution            | string | No       | Name of the institution where the student is enrolled                                               |
+| department             | string | Yes      | Student's department or faculty                                                                     |
+| level                  | string | Yes      | Current level/year of study (e.g., "100", "200", "300", "400", "500")                               |
+| program                | string | Yes      | Type of program: `secondary`, `undergraduate`, `postgraduate`, `diploma`, `certificate`, or `other` |
+| matricNumber           | string | No       | Student's unique matriculation or registration number                                               |
+| admissionYear          | number | Yes      | Year the student was admitted (4-digit year)                                                        |
+| expectedGraduationYear | number | Yes      | Expected year of graduation (4-digit year)                                                          |
 
 ## Program Types
 
@@ -116,48 +120,51 @@ The `program` field indicates the educational level:
 ### JavaScript (Fetch API)
 
 ```javascript
-const token = 'your_access_token_here';
+const token = "your_access_token_here";
 
-fetch('https://api.syncnexa.com/user/academic-details', {
-  method: 'GET',
+fetch("https://api.syncnexa.com/user/academic-details", {
+  method: "GET",
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  }
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
 })
-.then(response => response.json())
-.then(data => {
-  console.log('Academic Details:', data.data);
-  console.log('Institution:', data.data.institution);
-  console.log('Program:', data.data.program);
-  console.log('Level:', data.data.level);
-})
-.catch(error => {
-  console.error('Error:', error);
-});
+  .then((response) => response.json())
+  .then((data) => {
+    console.log("Academic Details:", data.data);
+    console.log("Institution:", data.data.institution);
+    console.log("Program:", data.data.program);
+    console.log("Level:", data.data.level);
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });
 ```
 
 ### JavaScript (Axios)
 
 ```javascript
-const axios = require('axios');
+const axios = require("axios");
 
-const token = 'your_access_token_here';
+const token = "your_access_token_here";
 
-axios.get('https://api.syncnexa.com/user/academic-details', {
-  headers: {
-    'Authorization': `Bearer ${token}`
-  }
-})
-.then(response => {
-  const { data } = response.data;
-  console.log('Academic Details:', data);
-  console.log(`${data.program} student at ${data.institution}`);
-  console.log(`Level: ${data.level}, Expected Graduation: ${data.expectedGraduationYear}`);
-})
-.catch(error => {
-  console.error('Error:', error.response?.data || error.message);
-});
+axios
+  .get("https://api.syncnexa.com/user/academic-details", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  .then((response) => {
+    const { data } = response.data;
+    console.log("Academic Details:", data);
+    console.log(`${data.program} student at ${data.institution}`);
+    console.log(
+      `Level: ${data.level}, Expected Graduation: ${data.expectedGraduationYear}`,
+    );
+  })
+  .catch((error) => {
+    console.error("Error:", error.response?.data || error.message);
+  });
 ```
 
 ### cURL
@@ -201,41 +208,41 @@ else:
 ### Node.js (Native HTTPS)
 
 ```javascript
-const https = require('https');
+const https = require("https");
 
-const token = 'your_access_token_here';
+const token = "your_access_token_here";
 
 const options = {
-  hostname: 'api.syncnexa.com',
-  path: '/user/academic-details',
-  method: 'GET',
+  hostname: "api.syncnexa.com",
+  path: "/user/academic-details",
+  method: "GET",
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  }
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
 };
 
 const req = https.request(options, (res) => {
-  let data = '';
+  let data = "";
 
-  res.on('data', (chunk) => {
+  res.on("data", (chunk) => {
     data += chunk;
   });
 
-  res.on('end', () => {
+  res.on("end", () => {
     const response = JSON.parse(data);
     if (res.statusCode === 200) {
-      console.log('Academic Details:', response.data);
+      console.log("Academic Details:", response.data);
       console.log(`Student at ${response.data.institution}`);
       console.log(`${response.data.program} - Level ${response.data.level}`);
     } else {
-      console.error('Error:', response.message);
+      console.error("Error:", response.message);
     }
   });
 });
 
-req.on('error', (error) => {
-  console.error('Request Error:', error);
+req.on("error", (error) => {
+  console.error("Request Error:", error);
 });
 
 req.end();
@@ -286,6 +293,7 @@ req.end();
 ### Student Record Not Found (404)
 
 This typically means:
+
 - The authenticated user is not registered as a student
 - The student record hasn't been created yet (new user)
 - Data migration or sync issues
@@ -295,6 +303,7 @@ This typically means:
 ### Forbidden Access (403)
 
 This means:
+
 - The authenticated user doesn't have the `student` role
 - The user might be a `staff`, `developer`, or `visitor`
 
@@ -303,10 +312,12 @@ This means:
 ## Changelog
 
 ### Version 1.1.0 (February 2026)
+
 - Added `program` field to distinguish education level
 - Added `expectedGraduationYear` field
 - Renamed internal `degree` field to `degree_name` (API unchanged)
 
 ### Version 1.0.0 (January 2026)
+
 - Initial release
 - Basic academic details endpoint with institution, department, level, and matric number

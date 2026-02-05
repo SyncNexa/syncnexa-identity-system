@@ -98,6 +98,19 @@ export async function findAcademicByUser(userId: number | string) {
   }
 }
 
+export async function findAcademicById(id: number | string) {
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT * FROM academic_records WHERE id = ?`,
+      [id],
+    );
+    return rows[0] || null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
 export async function getStudentByUserId(userId: number | string) {
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
@@ -165,6 +178,7 @@ export default {
   insertAcademicRecord,
   updateAcademicRecord,
   findAcademicByUser,
+  findAcademicById,
   getStudentByUserId,
   insertTranscript,
   findTranscriptsByAcademic,

@@ -1,0 +1,7 @@
+-- UP
+ALTER TABLE users
+ADD COLUMN linked_id CHAR(36) UNIQUE AFTER id;
+
+-- DOWN
+ALTER TABLE users
+DROP COLUMN linked_id;

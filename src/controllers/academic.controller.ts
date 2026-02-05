@@ -48,6 +48,19 @@ export async function listRecords(req: Request, res: Response) {
   }
 }
 
+export async function getRecord(req: Request, res: Response) {
+  try {
+    const id = paramToString(req.params.id);
+    if (!id) return sendError(400, "id required", res);
+    const record = await academicService.getAcademicRecordById(id);
+    if (!record) return sendError(404, "Academic record not found", res);
+    return sendSuccess(200, "Academic record", res, record);
+  } catch (err) {
+    console.error(err);
+    return sendError(500, "Fetch failed", res);
+  }
+}
+
 export async function uploadTranscript(req: Request, res: Response) {
   try {
     const academicId = paramToString(req.params.academicId);
@@ -92,6 +105,7 @@ export default {
   addRecord,
   updateRecord,
   listRecords,
+  getRecord,
   uploadTranscript,
   listTranscripts,
 };

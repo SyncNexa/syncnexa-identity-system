@@ -15,6 +15,11 @@ export async function getAcademicRecordsForUser(userId: number | string) {
   return rows;
 }
 
+export async function getAcademicRecordById(id: number | string) {
+  const record = await academicModel.findAcademicById(id);
+  return record;
+}
+
 export async function uploadTranscript(payload: any) {
   const t = await academicModel.insertTranscript(payload);
   return t;
@@ -29,6 +34,7 @@ export default {
   addAcademicRecord,
   updateAcademicRecord,
   getAcademicRecordsForUser,
+  getAcademicRecordById,
   uploadTranscript,
   getTranscripts,
 };

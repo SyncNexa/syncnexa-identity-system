@@ -216,3 +216,69 @@ export async function updateUserPassword(id: string, passwordHash: string) {
     return null;
   }
 }
+
+export async function selectStudentPersonalInfo(id: string) {
+  const client = await pool.getConnection();
+  try {
+    const q =
+      "SELECT first_name, last_name, email, phone, gender, linked_id, updated_at, email_verified, phone_verified, profile_image, user_state, user_country, user_address FROM users WHERE id = ?";
+    const [result] = await client.query<RowDataPacket[]>(q, [id]);
+    return result[0];
+  } catch (err) {
+    client.rollback();
+    console.log(err);
+    return null;
+  }
+}
+
+export async function getUserPersonalInfo(userId: string) {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      first_name, 
+      last_name, 
+      email, 
+      email_status,
+      phone, 
+      phone_status,
+      user_address, 
+      gender,
+      linked_id
+    FROM users 
+    WHERE id = ?`,
+    [userId],
+  );
+  return rows[0] || null;
+}
+
+export async function getUserBasicInfo(userId: string) {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      first_name, 
+      last_name, 
+      email, 
+      profile_image,
+      user_role,
+      account_status
+    FROM users 
+    WHERE id = ?`,
+    [userId],
+  );
+  return rows[0] || null;
+}
+
+export async function getStudentAcademicDetails(userId: string) {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      institution,
+      department,
+      student_level,
+      program,
+      matric_number,
+      admission_year,
+      expected_graduation_year
+    FROM students 
+    WHERE user_id = ?`,
+    [userId],
+  );
+  return rows[0] || null;
+}

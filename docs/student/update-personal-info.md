@@ -57,6 +57,8 @@ All fields are optional. Only provide the fields you want to update.
 
 ### Success Response (200 OK)
 
+Regular update (no email change):
+
 ```json
 {
   "status": "success",
@@ -74,6 +76,37 @@ All fields are optional. Only provide the fields you want to update.
   }
 }
 ```
+
+### Email Update Response (202 Accepted)
+
+When email is updated, the response is 202 Accepted:
+
+```json
+{
+  "status": "success",
+  "statusCode": 202,
+  "message": "Personal information updated. Email verification required.",
+  "data": {
+    "fullName": "John Doe",
+    "email": "john.doe@example.com",
+    "emailStatus": "pending",
+    "phoneNumber": "+234812345678",
+    "phoneStatus": "pending",
+    "address": "123 Main Street, Lagos, Nigeria",
+    "gender": "male",
+    "linkedId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "emailVerificationRequired": true
+}
+```
+
+**Important**: When email is updated:
+
+- `emailStatus` is automatically reset to `"pending"`
+- An OTP is generated and sent to the new email address
+- Previous verification tokens are revoked
+- Client should redirect user to email verification page
+- The 202 status code indicates email verification is needed
 
 ### Error Responses
 
@@ -171,10 +204,44 @@ All fields are optional. Only provide the fields you want to update.
 - Can include street, city, state, country
 - Example: `123 Main Street, Lagos, Nigeria`
 
-### Gender
+## Email Verification Handling
 
-- Must be one of: `male`, `female`, `other`
-- Case-sensitive lowercase values
+When you update the email address, the system automatically:
+
+1. **Resets Email Status**: Sets `emailStatus` to `"pending"`
+2. **Revokes Old Tokens**: Invalidates any existing email verification tokens
+3. **Generates OTP**: Creates a new One-Time Password
+4. **Sends Email**: Emails the OTP to the new email address (valid for 15 minutes)
+5. **Returns 202 Status**: Responds with 202 Accepted instead of 200 OK
+6. **Includes Flag**: Sets `emailVerificationRequired: true` in response
+
+### Client-Side Handling
+
+When you receive a 202 response with `emailVerificationRequired: true`:
+
+```javascript
+fetch('...', { method: 'PATCH', ... })
+  .then(response => response.json())
+  .then(data => {
+    if (data.statusCode === 202 && data.emailVerificationRequired) {
+      // Redirect to email verification page
+      window.location.href = '/verify-email';
+      // User will receive OTP at their new email
+    }
+  });
+```
+
+### Status Codes Summary
+
+| Status Code | Scenario                               | Action Required                     |
+| ----------- | -------------------------------------- | ----------------------------------- |
+| 200         | Successful update without email change | None, update complete               |
+| 202         | Email updated successfully             | User must verify new email with OTP |
+| 400         | Validation error (invalid format)      | Fix payload and retry               |
+| 401         | Unauthorized (invalid token)           | Re-authenticate and retry           |
+| 403         | Forbidden (not a student)              | Only students can use this endpoint |
+| 404         | User not found                         | Check authentication                |
+| 500         | Server error                           | Retry or contact support            |
 
 ## Example Requests
 
@@ -200,16 +267,44 @@ fetch("https://api.syncnexa.com/user/personal-info", {
 })
   .then((response) => response.json())
   .then((data) => {
-    if (data.status === "success") {
+    if (data.statusCode === 202 && data.emailVerificationRequired) {
+      // Email was changed, user needs to verify
+      console.log("Email updated! OTP sent to: " + data.data.email);
+      window.location.href = "/verify-email";
+    } else if (data.status === "success") {
       console.log("Updated Successfully:", data.data);
       console.log("New Name:", data.data.fullName);
-      console.log("New Phone:", data.data.phoneNumber);
     } else {
       console.error("Update failed:", data.message);
     }
   })
   .catch((error) => {
     console.error("Error:", error);
+  });
+```
+
+### Email Update Example
+
+```javascript
+const updates = {
+  email: "newemail@example.com",
+};
+
+fetch("https://api.syncnexa.com/user/personal-info", {
+  method: "PATCH",
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(updates),
+})
+  .then((response) => response.json())
+  .then((data) => {
+    // Response will have 202 status and emailVerificationRequired: true
+    if (data.emailVerificationRequired) {
+      // Redirect to verification page
+      // User will see form to enter OTP sent to newemail@example.com
+    }
   });
 ```
 
@@ -459,6 +554,23 @@ After successful update, the endpoint returns the complete updated personal info
 - Email uniqueness is validated - cannot update to an email already in use
 - No date of birth field is supported in this endpoint
 - Linked ID is generated on account creation and cannot be changed
+- **Email Changes**: When email is updated, verification status resets to pending and OTP is sent
+- **OTP Expiration**: Verification OTP expires after 15 minutes
+- **Verification Required**: 202 status code indicates email verification is required before email becomes active
+- **Revoked Tokens**: All previous email verification tokens are automatically revoked when email changes
+
+## Email Verification Flow
+
+When you update your email:
+
+1. **Update Request** → PATCH `/user/personal-info` with new email
+2. **System Actions** → Email is updated, status set to pending, OTP generated
+3. **Response 202** → Receive special 202 Accepted response with `emailVerificationRequired: true`
+4. **Client Action** → Redirect user to verification page
+5. **User Enters OTP** → User receives OTP at new email and enters it
+6. **Verification Complete** → Email status changes to "verified"
+
+The email is technically updated but not fully verified until the OTP is confirmed.
 
 ## Related Endpoints
 

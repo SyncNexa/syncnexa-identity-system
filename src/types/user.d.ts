@@ -40,3 +40,39 @@ interface Staff extends User {
   department?: string;
   permissions?: Record<string, boolean>; // from JSON column
 }
+
+interface PersonalInfo {
+  fullName: string;
+  email: string;
+  emailStatus: "pending" | "verified" | "failed";
+  phoneNumber: string;
+  phoneStatus: "pending" | "verified" | "failed";
+  address: string;
+  gender: "male" | "female" | "other";
+  linkedId: string | null;
+}
+
+interface UserMe {
+  fullName: string;
+  role: string;
+  profileImage: string | null;
+  email: string;
+  accountStatus: "active" | "suspended" | "deactivated";
+}
+
+interface AcademicDetails {
+  institution: string;
+  department: string | null;
+  level: string | null;
+  program:
+    | "secondary"
+    | "undergraduate"
+    | "postgraduate"
+    | "diploma"
+    | "certificate"
+    | "other"
+    | null;
+  matricNumber: string;
+  admissionYear: number | null;
+  expectedGraduationYear: number | null;
+}

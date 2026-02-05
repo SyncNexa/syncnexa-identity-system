@@ -325,3 +325,13 @@ export async function updateUserPersonalInfo(
 
   return (result as any).affectedRows > 0;
 }
+
+export async function resetEmailVerificationStatus(
+  userId: string,
+): Promise<boolean> {
+  const [result] = await pool.query(
+    `UPDATE users SET email_status = 'pending' WHERE id = ?`,
+    [userId],
+  );
+  return (result as any).affectedRows > 0;
+}

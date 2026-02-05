@@ -124,14 +124,25 @@ export async function updatePersonalInfo(req: Request, res: Response) {
     const userId = req.user?.id;
     if (!userId) return sendError(400, "user_id required", res);
 
-    const personalInfo = await studentService.updatePersonalInfo(
+    const result = await studentService.updatePersonalInfo(
       userId as string,
       req.body,
     );
-    if (!personalInfo)
+    if (!result || !result.data)
       return sendError(404, "Personal information not found", res);
 
-    return sendSuccess(200, "Personal information updated", res, personalInfo);
+    // If email was updated, return 202 Accepted with verification required flag
+    if (result.emailVerificationRequired) {
+      return res.status(202).json({
+        status: "success",
+        statusCode: 202,
+        message: "Personal information updated. Email verification required.",
+        data: result.data,
+        emailVerificationRequired: true,
+      });
+    }
+
+    return sendSuccess(200, "Personal information updated", res, result.data);
   } catch (err) {
     console.error(err);
     return sendError(500, "Could not update personal information", res);

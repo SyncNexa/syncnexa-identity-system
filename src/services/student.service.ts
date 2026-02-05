@@ -1,41 +1,6 @@
 import studentDocModel from "../models/studentDocument.model.js";
 import * as userModel from "../models/user.model.js";
-
-interface PersonalInfo {
-  fullName: string;
-  email: string;
-  emailStatus: "pending" | "verified" | "failed";
-  phoneNumber: string;
-  phoneStatus: "pending" | "verified" | "failed";
-  address: string;
-  gender: "male" | "female" | "other";
-  linkedId: string | null;
-}
-
-interface UserMe {
-  fullName: string;
-  role: string;
-  profileImage: string | null;
-  email: string;
-  accountStatus: "active" | "suspended" | "deactivated";
-}
-
-interface AcademicDetails {
-  institution: string;
-  department: string | null;
-  level: string | null;
-  program:
-    | "secondary"
-    | "undergraduate"
-    | "postgraduate"
-    | "diploma"
-    | "certificate"
-    | "other"
-    | null;
-  matricNumber: string;
-  admissionYear: number | null;
-  expectedGraduationYear: number | null;
-}
+import * as emailVerificationService from "./emailVerification.service.js";
 
 export async function uploadIdentityDocument(payload: any) {
   // payload: { user_id, doc_type, filename, filepath, mime_type, file_size, meta }
@@ -130,8 +95,17 @@ export async function updatePersonalInfo(
     address?: string;
     gender?: string;
   },
-): Promise<PersonalInfo | null> {
+): Promise<{ data: PersonalInfo; emailVerificationRequired?: boolean }> {
   try {
+    // Get current user data first to check if email actually changed
+    const currentUser = await userModel.getUserPersonalInfo(userId);
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
+
+    const emailChanged =
+      payload.email !== undefined && payload.email !== currentUser.email;
+
     // Build update object with correct database column names
     const updates: any = {};
     if (payload.firstName !== undefined) updates.first_name = payload.firstName;
@@ -147,13 +121,25 @@ export async function updatePersonalInfo(
       throw new Error("Failed to update personal information");
     }
 
+    // If email was actually changed to a different one, handle verification reset and OTP
+    if (emailChanged) {
+      // Reset email verification status to pending
+      await userModel.resetEmailVerificationStatus(userId);
+
+      // Revoke existing verification tokens
+      await emailVerificationService.revokeEmailVerificationTokens(userId);
+
+      // Create and send new OTP to the new email
+      await emailVerificationService.createAndSendEmailVerificationOTP(userId);
+    }
+
     // Fetch and return updated personal info
     const user = await userModel.getUserPersonalInfo(userId);
     if (!user) {
-      return null;
+      return null as any;
     }
 
-    return {
+    const personalInfo: PersonalInfo = {
       fullName: `${user.first_name} ${user.last_name}`,
       email: user.email,
       emailStatus: user.email_status as "pending" | "verified" | "failed",
@@ -162,6 +148,11 @@ export async function updatePersonalInfo(
       address: user.user_address || "",
       gender: user.gender as "male" | "female" | "other",
       linkedId: user.linked_id || null,
+    };
+
+    return {
+      data: personalInfo,
+      emailVerificationRequired: emailChanged,
     };
   } catch (error) {
     console.error("Error updating personal info:", error);

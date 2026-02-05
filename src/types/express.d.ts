@@ -2,6 +2,7 @@ namespace Express {
   interface Request {
     user?: User | Student | Developer | Staff;
     authRole?: "student" | "developer" | "staff";
+    rawBody?: string;
     auditLog?: {
       action: string;
       admin_id: string;

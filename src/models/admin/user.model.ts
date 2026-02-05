@@ -94,7 +94,7 @@ export async function getUserById(userId: string): Promise<any> {
       s.matric_number,
       s.department,
       s.faculty,
-      s.program,
+      s.degree,
       s.student_level,
       s.admission_year,
       s.graduation_year

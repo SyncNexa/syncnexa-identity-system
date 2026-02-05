@@ -61,7 +61,8 @@ export async function createNewUser(user: any) {
       gender: user.gender,
       phone: user.phone,
       user_role: userRole,
-      is_verified: false,
+      email_verified: false,
+      email_status: "pending",
       account_status: "active",
     } as any;
 
@@ -79,7 +80,7 @@ export async function createNewUser(user: any) {
       }
 
       await client.query(
-        `INSERT INTO students (user_id, institution, matric_number, department, faculty, program, student_level, admission_year, graduation_year)
+        `INSERT INTO students (user_id, institution, matric_number, department, faculty, degree, student_level, admission_year, graduation_year)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           userId,
@@ -87,7 +88,7 @@ export async function createNewUser(user: any) {
           matric,
           academicInfo.department || null,
           academicInfo.faculty || null,
-          academicInfo.program || null,
+          academicInfo.degree || null,
           academicInfo.student_level || null,
           academicInfo.admission_year || null,
           academicInfo.graduation_year || null,
@@ -171,9 +172,10 @@ export async function markUserVerified(id: string) {
     if (row.length == 0) {
       return null;
     }
-    await client.query(`UPDATE users SET is_verified = TRUE WHERE id = ?`, [
-      id,
-    ]);
+    await client.query(
+      `UPDATE users SET email_verified = TRUE, email_status = 'verified' WHERE id = ?`,
+      [id],
+    );
 
     const [result] = await client.query<RowDataPacket[]>(
       `SELECT * FROM users WHERE id = ?`,
@@ -214,5 +216,156 @@ export async function updateUserPassword(id: string, passwordHash: string) {
     client.rollback();
     console.log(err);
     return null;
+  }
+}
+
+export async function selectStudentPersonalInfo(id: string) {
+  const client = await pool.getConnection();
+  try {
+    const q =
+      "SELECT first_name, last_name, email, phone, gender, linked_id, updated_at, email_verified, phone_verified, profile_image, user_state, user_country, user_address FROM users WHERE id = ?";
+    const [result] = await client.query<RowDataPacket[]>(q, [id]);
+    return result[0];
+  } catch (err) {
+    client.rollback();
+    console.log(err);
+    return null;
+  }
+}
+
+export async function getUserPersonalInfo(userId: string) {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      first_name, 
+      last_name, 
+      email, 
+      email_status,
+      phone, 
+      phone_status,
+      user_address, 
+      gender,
+      linked_id
+    FROM users 
+    WHERE id = ?`,
+    [userId],
+  );
+  return rows[0] || null;
+}
+
+export async function getUserBasicInfo(userId: string) {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      first_name, 
+      last_name, 
+      email, 
+      profile_image,
+      user_role,
+      account_status
+    FROM users 
+    WHERE id = ?`,
+    [userId],
+  );
+  return rows[0] || null;
+}
+
+export async function getStudentAcademicDetails(userId: string) {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      institution,
+      department,
+      student_level,
+      program,
+      matric_number,
+      admission_year,
+      expected_graduation_year
+    FROM students 
+    WHERE user_id = ?`,
+    [userId],
+  );
+  return rows[0] || null;
+}
+
+export async function updateUserPersonalInfo(
+  userId: string,
+  updates: {
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    phone?: string;
+    user_address?: string;
+    gender?: string;
+    linked_id?: string;
+  },
+): Promise<boolean> {
+  const allowedFields = [
+    "first_name",
+    "last_name",
+    "email",
+    "phone",
+    "user_address",
+    "gender",
+    "linked_id",
+  ];
+  const fieldsToUpdate = Object.keys(updates).filter((key) =>
+    allowedFields.includes(key),
+  );
+
+  if (fieldsToUpdate.length === 0) {
+    return true; // No fields to update
+  }
+
+  const setClauses = fieldsToUpdate.map((field) => `${field} = ?`).join(", ");
+  const values = fieldsToUpdate.map(
+    (field) => updates[field as keyof typeof updates],
+  );
+  values.push(userId);
+
+  const [result] = await pool.query(
+    `UPDATE users SET ${setClauses} WHERE id = ?`,
+    values,
+  );
+
+  return (result as any).affectedRows > 0;
+}
+
+export async function resetEmailVerificationStatus(
+  userId: string,
+): Promise<boolean> {
+  const [result] = await pool.query(
+    `UPDATE users SET email_status = 'pending' WHERE id = ?`,
+    [userId],
+  );
+  return (result as any).affectedRows > 0;
+}
+
+export async function logEmailChange(
+  userId: string,
+  oldEmail: string,
+  newEmail: string,
+): Promise<boolean> {
+  try {
+    const changeId = generateUUID();
+    const [result] = await pool.query(
+      `INSERT INTO email_change_logs (id, user_id, old_email, new_email)
+       VALUES (?, ?, ?, ?)`,
+      [changeId, userId, oldEmail, newEmail],
+    );
+    return (result as any).affectedRows > 0;
+  } catch (err) {
+    console.error("Error logging email change:", err);
+    throw err;
+  }
+}
+
+export async function getEmailChangeCount(userId: string): Promise<number> {
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT COUNT(*) as count FROM email_change_logs WHERE user_id = ?`,
+      [userId],
+    );
+    return rows[0]?.count || 0;
+  } catch (err) {
+    console.error("Error getting email change count:", err);
+    throw err;
   }
 }

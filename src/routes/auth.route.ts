@@ -15,7 +15,7 @@ import {
   isValidInstitution,
   isValidFacultyForInstitution,
 } from "../utils/universities.js";
-import { isValidProgramForInstitution } from "../utils/programs.js";
+import { isValidDegreeForInstitution } from "../utils/degrees.js";
 import { z } from "zod";
 
 const router = express.Router();
@@ -108,9 +108,9 @@ export const registerSchema = z.object({
             .string()
             .min(1, "Faculty code is required for students")
             .optional(),
-          program: z
+          degree: z
             .string()
-            .min(2, "Program (degree) is required for students")
+            .min(2, "Degree is required for students")
             .optional(),
           student_level: z.string().optional(),
           admission_year: z
@@ -150,16 +150,15 @@ export const registerSchema = z.object({
     )
     .refine(
       (data) => {
-        // If role is student, academic_info.program must be present
+        // If role is student, academic_info.degree must be present
         if (data.role === "student") {
-          return Boolean(data.academic_info && data.academic_info.program);
+          return Boolean(data.academic_info && data.academic_info.degree);
         }
         return true;
       },
       {
-        message:
-          "Program (degree) is required in academic_info for student registration",
-        path: ["academic_info", "program"],
+        message: "Degree is required in academic_info for student registration",
+        path: ["academic_info", "degree"],
       },
     )
     .refine(
@@ -218,22 +217,22 @@ export const registerSchema = z.object({
     )
     .refine(
       (data) => {
-        // If role is student and we know programs for the institution, validate program
+        // If role is student and we know degrees for the institution, validate degree
         if (
           data.role === "student" &&
-          data.academic_info?.program &&
+          data.academic_info?.degree &&
           data.academic_info?.institution
         ) {
-          return isValidProgramForInstitution(
+          return isValidDegreeForInstitution(
             data.academic_info.institution,
-            data.academic_info.program,
+            data.academic_info.degree,
           );
         }
         return true;
       },
       {
-        message: "Program is not in the allowed list of degree types",
-        path: ["academic_info", "program"],
+        message: "Degree is not in the allowed list of degree types",
+        path: ["academic_info", "degree"],
       },
     ),
 });

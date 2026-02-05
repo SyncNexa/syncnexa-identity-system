@@ -9,7 +9,10 @@ interface User {
   user_state?: string | null;
   user_address?: string | null;
   gender?: "male" | "female" | "custom" | null;
-  is_verified: boolean;
+  email_verified: boolean;
+  email_status: "pending" | "verified" | "failed";
+  phone_verified?: boolean;
+  phone_status?: "pending" | "verified" | "failed";
   profile_image?: string | null;
   user_role: "student" | "developer" | "staff";
   account_status: "active" | "suspended" | "deactivated";
@@ -22,7 +25,7 @@ interface Student extends User {
   matric_number: string;
   department?: string;
   faculty?: string;
-  program?: string;
+  degree?: string;
   level?: string;
   graduation_year?: number;
   is_institution_verified?: boolean;
@@ -39,4 +42,40 @@ interface Staff extends User {
   position?: string;
   department?: string;
   permissions?: Record<string, boolean>; // from JSON column
+}
+
+interface PersonalInfo {
+  fullName: string;
+  email: string;
+  emailStatus: "pending" | "verified" | "failed";
+  phoneNumber: string;
+  phoneStatus: "pending" | "verified" | "failed";
+  address: string;
+  gender: "male" | "female" | "other";
+  linkedId: string | null;
+}
+
+interface UserMe {
+  fullName: string;
+  role: string;
+  profileImage: string | null;
+  email: string;
+  accountStatus: "active" | "suspended" | "deactivated";
+}
+
+interface AcademicDetails {
+  institution: string;
+  department: string | null;
+  level: string | null;
+  program:
+    | "secondary"
+    | "undergraduate"
+    | "postgraduate"
+    | "diploma"
+    | "certificate"
+    | "other"
+    | null;
+  matricNumber: string;
+  admissionYear: number | null;
+  expectedGraduationYear: number | null;
 }

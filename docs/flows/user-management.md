@@ -787,7 +787,7 @@ The User Management flow encompasses all operations related to a student's profi
 {
   "institution": "University of Lagos",
   "student_id": "UL/18/CS/1234",
-  "program": "Computer Science",
+  "degree": "Computer Science",
   "year_of_study": "Graduate",
   "valid_from": "2022-09-01",
   "valid_until": "2026-08-31",
@@ -812,7 +812,7 @@ The User Management flow encompasses all operations related to a student's profi
     "card_uuid": "card-uuid-b60e8400-e29b-41d4-a716-446655440007",
     "institution": "University of Lagos",
     "student_id": "UL/18/CS/1234",
-    "program": "Computer Science",
+    "degree": "Computer Science",
     "year_of_study": "Graduate",
     "valid_from": "2022-09-01",
     "valid_until": "2026-08-31",
@@ -1303,7 +1303,6 @@ When trying to access or modify resources owned by other users:
 2. **Metadata:** Use the metadata fields to store additional context that doesn't fit the structured fields. This provides flexibility for future enhancements.
 
 3. **Verification Workflow:**
-
    - Upload documents first
    - Request verification second
    - Monitor verification status regularly
@@ -1311,7 +1310,6 @@ When trying to access or modify resources owned by other users:
 4. **Portfolio Management:** Keep projects and certificates up-to-date. Feature your best work using the `is_featured` flag.
 
 5. **Token Management:**
-
    - Set appropriate expiration times for verification tokens
    - Use narrow scopes to limit data exposure
    - Revoke tokens when no longer needed

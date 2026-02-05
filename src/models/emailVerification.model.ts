@@ -102,7 +102,10 @@ export async function revokeAllEmailVerificationTokens(userId: string) {
  */
 export async function markEmailAsVerified(userId: string) {
   try {
-    await pool.query(`UPDATE users SET is_verified = 1 WHERE id = ?`, [userId]);
+    await pool.query(
+      `UPDATE users SET email_verified = 1, email_status = 'verified' WHERE id = ?`,
+      [userId],
+    );
     return true;
   } catch (err) {
     console.error("Error marking email as verified:", err);
@@ -116,7 +119,7 @@ export async function markEmailAsVerified(userId: string) {
 export async function getEmailVerificationStatus(userId: string) {
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT is_verified FROM users WHERE id = ?`,
+      `SELECT email_verified, email_status FROM users WHERE id = ?`,
       [userId],
     );
 
@@ -124,7 +127,7 @@ export async function getEmailVerificationStatus(userId: string) {
       return false;
     }
 
-    return (rows[0] as any).is_verified === 1;
+    return (rows[0] as any).email_verified === 1;
   } catch (err) {
     console.error("Error checking email verification status:", err);
     return false;

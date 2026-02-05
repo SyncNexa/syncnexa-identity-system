@@ -98,10 +98,106 @@ export async function getVerificationStatus(req: Request, res: Response) {
   }
 }
 
+export async function getPersonalInfo(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(400, "user_id required", res);
+
+    const personalInfo = await studentService.getPersonalInfo(userId as string);
+    if (!personalInfo)
+      return sendError(404, "Personal information not found", res);
+
+    return sendSuccess(
+      200,
+      "Personal information retrieved",
+      res,
+      personalInfo,
+    );
+  } catch (err) {
+    console.error(err);
+    return sendError(500, "Could not fetch personal information", res);
+  }
+}
+
+export async function updatePersonalInfo(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(400, "user_id required", res);
+
+    const ipAddress =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0] ||
+      req.socket.remoteAddress ||
+      undefined;
+    const userAgent = req.headers["user-agent"];
+
+    const result = await studentService.updatePersonalInfo(
+      userId as string,
+      req.body,
+      ipAddress,
+      userAgent,
+    );
+    if (!result || !result.data)
+      return sendError(404, "Personal information not found", res);
+
+    // If email was updated, return 202 Accepted with verification required flag
+    if (result.emailVerificationRequired) {
+      return res.status(202).json({
+        status: "success",
+        statusCode: 202,
+        message: "Personal information updated. Email verification required.",
+        data: result.data,
+        emailVerificationRequired: true,
+      });
+    }
+
+    return sendSuccess(200, "Personal information updated", res, result.data);
+  } catch (err) {
+    console.error(err);
+    return sendError(500, "Could not update personal information", res);
+  }
+}
+
+export async function getMe(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(400, "user_id required", res);
+
+    const meInfo = await studentService.getMe(userId as string);
+    if (!meInfo) return sendError(404, "User not found", res);
+
+    return sendSuccess(200, "User info retrieved", res, meInfo);
+  } catch (err) {
+    console.error(err);
+    return sendError(500, "Could not fetch user info", res);
+  }
+}
+
+export async function getAcademicDetails(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(400, "user_id required", res);
+
+    const academicDetails = await studentService.getAcademicDetails(
+      userId as string,
+    );
+    if (!academicDetails)
+      return sendError(404, "Academic details not found", res);
+
+    return sendSuccess(200, "Academic details retrieved", res, academicDetails);
+  } catch (err) {
+    console.error(err);
+    return sendError(500, "Could not fetch academic details", res);
+  }
+}
+
 export default {
   uploadDocument,
   updateDocument,
   requestVerification,
   setVerificationStatus,
   getVerificationStatus,
+  getPersonalInfo,
+  updatePersonalInfo,
+  getMe,
+  getAcademicDetails,
 };

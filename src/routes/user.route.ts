@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/role.middleware.js";
 import { activityLog } from "../middlewares/activity.middleware.js";
@@ -9,6 +9,7 @@ import * as studentsController from "../controllers/students.controller.js";
 import * as activityController from "../controllers/activity.controller.js";
 import * as academicController from "../controllers/academic.controller.js";
 import * as institutionController from "../controllers/institution.controller.js";
+import * as schoolVerificationController from "../controllers/schoolVerification.controller.js";
 import * as studentCardController from "../controllers/studentCard.controller.js";
 import * as shareableLinkController from "../controllers/shareableLink.controller.js";
 import * as verificationController from "../controllers/verification.controller.js";
@@ -24,6 +25,7 @@ import verificationValidator from "../validators/verification.validator.js";
 import verificationCenterValidator from "../validators/verificationCenter.validator.js";
 import shareableLinkValidator from "../validators/shareableLink.validator.js";
 import institutionValidator from "../validators/institution.validator.js";
+import schoolVerificationValidator from "../validators/schoolVerification.validator.js";
 import studentCardValidator from "../validators/studentCard.validator.js";
 import portfolioValidator from "../validators/portfolio.validator.js";
 import cvValidator from "../validators/cv.validator.js";
@@ -32,15 +34,30 @@ import dashboardValidator from "../validators/dashboard.validator.js";
 
 const router = express.Router();
 
-// Apply authentication to all routes in this router
 router.use(authenticate);
 router.use(activityLog());
 
-// User activity logs (students)
 router.get(
   "/activities",
   authorizeRoles("student"),
   activityController.getMyActivities,
+);
+router.get("/me", studentsController.getMe);
+router.get(
+  "/personal-info",
+  authorizeRoles("student"),
+  studentsController.getPersonalInfo,
+);
+router.patch(
+  "/personal-info",
+  authorizeRoles("student"),
+  validateRequest(studentValidator.updatePersonalInfoSchema),
+  studentsController.updatePersonalInfo,
+);
+router.get(
+  "/academic-details",
+  authorizeRoles("student"),
+  studentsController.getAcademicDetails,
 );
 
 router.post("/documents", studentsController.uploadDocument);
@@ -49,7 +66,6 @@ router.post("/documents/:id/verify", studentsController.requestVerification);
 router.patch("/verifications/:id", studentsController.setVerificationStatus);
 router.get("/verification-status", studentsController.getVerificationStatus);
 
-// Academic records & transcripts
 router.post(
   "/academics",
   authorizeRoles("student"),
@@ -76,7 +92,6 @@ router.get(
   academicController.listTranscripts,
 );
 
-// Institution verification requests
 router.post(
   "/verification-requests",
   authorizeRoles("student"),
@@ -95,7 +110,13 @@ router.patch(
   institutionController.updateRequest,
 );
 
-// Student cards (digital)
+router.post(
+  "/school-verification",
+  authorizeRoles("student"),
+  validateRequest(schoolVerificationValidator.initiateSchoolVerificationSchema),
+  schoolVerificationController.initiateSchoolVerification,
+);
+
 router.post(
   "/cards",
   authorizeRoles("student"),
@@ -115,7 +136,6 @@ router.post(
   studentCardController.verifyToken,
 );
 
-// Verification token APIs
 router.post(
   "/verification-tokens",
   authorizeRoles("student"),
@@ -140,7 +160,6 @@ router.get(
   verificationController.getLogs,
 );
 
-// Shareable links (privacy controls)
 router.post(
   "/shareable-links",
   authorizeRoles("student"),
@@ -160,7 +179,6 @@ router.post(
   shareableLinkController.validateLink,
 );
 
-// Portfolio routes
 router.post(
   "/projects",
   authorizeRoles("student"),
@@ -197,7 +215,6 @@ router.get(
   portfolioController.listCertificates,
 );
 
-// CV generation
 router.get(
   "/cv",
   authorizeRoles("student"),
@@ -205,7 +222,6 @@ router.get(
   cvController.getCv,
 );
 
-// Session Management & MFA
 router.post(
   "/sessions",
   authorizeRoles("student", "developer", "staff"),
@@ -229,7 +245,6 @@ router.post(
   sessionController.revokeAllSessions,
 );
 
-// TOTP MFA
 router.post(
   "/mfa/totp/setup",
   authorizeRoles("student", "developer", "staff"),
@@ -247,7 +262,6 @@ router.post(
   sessionController.disableTotp,
 );
 
-// Dashboard & Progress
 router.get(
   "/dashboard",
   authorizeRoles("student"),
@@ -266,7 +280,6 @@ router.get(
   validateRequest(dashboardValidator.getDashboardSchema),
   dashboardController.getSuggestions,
 );
-
 router.get(
   "/overview",
   authorizeRoles("student"),
@@ -274,35 +287,30 @@ router.get(
   dashboardController.getStudentOverview,
 );
 
-// Verification Center (New 4-Pillar System)
 router.get(
   "/verification-center",
   authorizeRoles("student"),
   validateRequest(verificationCenterValidator.getVerificationCenterSchema),
   verificationCenterController.getVerificationCenter,
 );
-
 router.get(
   "/verification-center/pillar/:pillar",
   authorizeRoles("student"),
   validateRequest(verificationCenterValidator.getPillarSchema),
   verificationCenterController.getVerificationPillar,
 );
-
 router.patch(
   "/verification-center/step/:stepId/status",
   authorizeRoles("student"),
   validateRequest(verificationCenterValidator.updateStepStatusSchema),
   verificationCenterController.updateStepStatus,
 );
-
 router.post(
   "/verification-center/step/:stepId/retry",
   authorizeRoles("student"),
   validateRequest(verificationCenterValidator.retryStepSchema),
   verificationCenterController.retryVerificationStep,
 );
-
 router.post(
   "/verification-center/admin/step/:stepId/review",
   authorizeRoles("staff"),
@@ -310,7 +318,6 @@ router.post(
   verificationCenterController.adminReviewStep,
 );
 
-// Attach multer and validation to upload endpoints
 router.post(
   "/documents",
   authorizeRoles("student"),
@@ -318,7 +325,6 @@ router.post(
   validateRequest(studentValidator.uploadDocumentSchema),
   studentsController.uploadDocument,
 );
-
 router.post(
   "/academics/:academicId/transcripts",
   authorizeRoles("student"),

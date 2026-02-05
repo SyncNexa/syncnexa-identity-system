@@ -6,9 +6,12 @@ import {
   getFacultiesForInstitution,
   isValidInstitution,
 } from "../utils/universities.js";
-import { getProgramsForInstitution } from "../utils/programs.js";
+import { getDegreesForInstitution } from "../utils/degrees.js";
 import { sendSuccess } from "../utils/response.js";
 import { sendError } from "../utils/error.js";
+import { validateRequest } from "../middlewares/validateRequest.middleware.js";
+import * as schoolVerificationController from "../controllers/schoolVerification.controller.js";
+import schoolVerificationValidator from "../validators/schoolVerification.validator.js";
 import adminRoutes from "./admin/index.route.js";
 
 const router = express.Router();
@@ -24,6 +27,13 @@ router.get("/health", (req, res) => {
 
   return sendSuccess(200, "Server is healthy", res);
 });
+
+// School verification callback (public)
+router.post(
+  "/verify/callback/:requestId",
+  validateRequest(schoolVerificationValidator.schoolVerificationCallbackSchema),
+  schoolVerificationController.handleSchoolVerificationCallback,
+);
 
 // Public endpoint to fetch universities filtered by region/country
 router.get("/universities", (req, res) => {
@@ -76,8 +86,8 @@ router.get("/institutions/:code/faculties", (req, res) => {
   });
 });
 
-// Public endpoint to fetch programs for a specific institution
-router.get("/institutions/:code/programs", (req, res) => {
+// Public endpoint to fetch degrees for a specific institution
+router.get("/institutions/:code/degrees", (req, res) => {
   const institutionCode = req.params.code?.toUpperCase();
 
   if (!institutionCode) {
@@ -88,12 +98,12 @@ router.get("/institutions/:code/programs", (req, res) => {
     return sendError(404, "Institution not found", res);
   }
 
-  const programs = getProgramsForInstitution(institutionCode);
+  const degrees = getDegreesForInstitution(institutionCode);
 
-  return sendSuccess(200, "Programs retrieved successfully", res, {
+  return sendSuccess(200, "Degrees retrieved successfully", res, {
     institutionCode,
-    count: programs.length,
-    programs,
+    count: degrees.length,
+    degrees,
   });
 });
 

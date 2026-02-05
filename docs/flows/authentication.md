@@ -50,7 +50,7 @@ Complete documentation for user authentication, registration, and session manage
   "academic_info": {
     "institution": "FUTO_NG",
     "matric_number": "20201230342",
-    "program": "B.Tech",
+    "degree": "B.Tech",
     "department": "Information Technology",
     "faculty": "SICT",
     "admission_year": 2021,
@@ -81,7 +81,7 @@ Complete documentation for user authentication, registration, and session manage
 | ----------------------------- | ------ | --------------------- | ----------------------------------------------- |
 | academic_info.institution     | string | Yes                   | Valid institution code (e.g., FUTO_NG, IMSU_NG) |
 | academic_info.matric_number   | string | Yes                   | Minimum 2 characters                            |
-| academic_info.program         | string | Yes                   | Degree type (e.g., B.Tech, B.Sc, B.Eng, MBA)    |
+| academic_info.degree          | string | Yes                   | Degree type (e.g., B.Tech, B.Sc, B.Eng, MBA)    |
 | academic_info.department      | string | No                    | Minimum 2 characters                            |
 | academic_info.faculty         | string | No                    | Valid faculty code for the institution          |
 | academic_info.admission_year  | number | Yes                   | Integer between 1900 and current year           |
@@ -181,8 +181,8 @@ Complete documentation for user authentication, registration, and session manage
 - **Invalid phone:** "Invalid phone number format (use E.164, e.g. +2348012345678)"
 - **Invalid gender:** "Invalid enum value. Expected 'male' | 'female' | 'non-binary' | 'other'"
 - **Missing student fields:** "Institution and matric_number are required in academic_info for student registration"
-- **Missing program:** "Program (degree) is required in academic_info for student registration"
-- **Invalid program:** "Program is not in the allowed list of degree types"
+- **Missing degree:** "Degree is required in academic_info for student registration"
+- **Invalid degree:** "Degree is not in the allowed list of degree types"
 - **Invalid institution:** "Invalid institution code. Please use institution codes like FUTO_NG, IMSU_NG, etc."
 - **Invalid faculty:** "Faculty code is not valid for the selected institution"
 

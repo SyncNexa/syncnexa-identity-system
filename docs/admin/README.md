@@ -158,7 +158,7 @@ Authorization: Bearer {token}
     "user_role": "student",
     "institution": "UNILAG_NG",
     "matric_number": "170405012",
-    "program": "B.Sc",
+    "degree": "B.Sc",
     "department": "Computer Science",
     "faculty": "Science",
     "admission_year": 2021,

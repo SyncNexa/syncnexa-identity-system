@@ -45,7 +45,7 @@ Content-Type: application/json
 }
 ```
 
-> **Note:** For student registration, you must include `academic_info` with `institution`, `matric_number`, and `program`. See [Authentication Flow](../flows/authentication.md) for details.
+> **Note:** For student registration, you must include `academic_info` with `institution`, `matric_number`, and `degree`. See [Authentication Flow](../flows/authentication.md) for details.
 
 ### Step 2: Login to Get Access Token
 

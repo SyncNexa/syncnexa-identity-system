@@ -7,33 +7,29 @@
         "path": "getting-started/overview"
       },
       {
-        "label": "App Registration",
-        "path": "getting-started/app-registration"
-      },
-      {
-        "label": "App Management",
-        "path": "getting-started/app-management"
-      },
-      {
         "label": "Installation",
         "path": "getting-started/installation"
       },
       {
         "label": "Quick Start",
         "path": "getting-started/quick-start"
+      },
+      {
+        "label": "API Overview",
+        "path": "api/README"
       }
     ]
   },
   {
-    "title": "API Flows",
+    "title": "Third Party",
     "items": [
       {
-        "label": "Authentication Flow",
-        "path": "flows/authentication"
+        "label": "App Registration",
+        "path": "getting-started/app-registration"
       },
       {
-        "label": "User Management Flow",
-        "path": "flows/user-management"
+        "label": "App Management",
+        "path": "getting-started/app-management"
       },
       {
         "label": "App Management Flow",
@@ -44,8 +40,85 @@
         "path": "flows/oauth-flow"
       },
       {
-        "label": "Dashboard Flow",
+        "label": "SAuth 1.0 Authorization Flow",
+        "path": "auth/oauth-flow"
+      },
+      {
+        "label": "Authorize",
+        "path": "api/auth/authorize"
+      },
+      {
+        "label": "Token Exchange",
+        "path": "api/auth/token"
+      }
+    ]
+  },
+  {
+    "title": "Student",
+    "items": [
+      {
+        "label": "Overview",
+        "path": "student/README"
+      },
+      {
+        "label": "Current User Info",
+        "path": "student/me"
+      },
+      {
+        "label": "Personal Information",
+        "path": "student/personal-info"
+      },
+      {
+        "label": "Update Personal Information",
+        "path": "student/update-personal-info"
+      },
+      {
+        "label": "Academic Details",
+        "path": "student/academic-details"
+      },
+      {
+        "label": "Documents",
+        "path": "student/documents"
+      },
+      {
+        "label": "Academic Records",
+        "path": "student/academic-records"
+      },
+      {
+        "label": "Portfolio",
+        "path": "student/portfolio"
+      },
+      {
+        "label": "Student Card",
+        "path": "student/student-card"
+      },
+      {
+        "label": "Verification Requests",
+        "path": "student/verification-requests"
+      },
+      {
+        "label": "Verification Tokens",
+        "path": "student/verification-tokens"
+      },
+      {
+        "label": "Shareable Links",
+        "path": "student/shareable-links"
+      },
+      {
+        "label": "Student Management Flow",
+        "path": "flows/user-management"
+      },
+      {
+        "label": "Student Dashboard Flow",
         "path": "flows/dashboard"
+      },
+      {
+        "label": "User Profile",
+        "path": "api/user/profile"
+      },
+      {
+        "label": "Universities & Faculties",
+        "path": "api/resources/universities"
       }
     ]
   },
@@ -53,8 +126,32 @@
     "title": "Authentication",
     "items": [
       {
-        "label": "OAuth 2.0 Flow",
-        "path": "auth/oauth-flow"
+        "label": "Overview",
+        "path": "authentication/README"
+      },
+      {
+        "label": "User Registration",
+        "path": "authentication/user-registration"
+      },
+      {
+        "label": "User Login",
+        "path": "authentication/user-login"
+      },
+      {
+        "label": "Refresh Token",
+        "path": "authentication/refresh-token"
+      },
+      {
+        "label": "User Logout",
+        "path": "authentication/user-logout"
+      },
+      {
+        "label": "Email Verification",
+        "path": "authentication/email-verification"
+      },
+      {
+        "label": "Authentication Flow",
+        "path": "flows/authentication"
       },
       {
         "label": "Token Management",
@@ -67,61 +164,72 @@
     ]
   },
   {
-    "title": "API Reference",
+    "title": "Verification",
     "items": [
       {
-        "label": "Authorize",
-        "path": "api/authorize"
+        "label": "Overview",
+        "path": "verification/README"
       },
       {
-        "label": "Token Exchange",
-        "path": "api/token"
+        "label": "Document Verification",
+        "path": "verification/document-verification"
       },
       {
-        "label": "User Profile",
-        "path": "api/user-profile"
+        "label": "Academic Records Verification",
+        "path": "verification/academic-records"
       },
       {
-        "label": "Email Verification",
+        "label": "Email Verification Flow",
+        "path": "auth/email-verification"
+      },
+      {
+        "label": "Email Verification API",
         "path": "api/email-verification"
+      },
+      {
+        "label": "Student Email Verification API",
+        "path": "api/student/email-verification"
       },
       {
         "label": "Verification Center",
         "path": "api/verification-center"
       },
       {
-        "label": "Security",
+        "label": "Student Verification Center",
+        "path": "api/student/verification-center"
+      },
+      {
+        "label": "School Verification API Spec",
+        "path": "api/school/verification-api-spec"
+      },
+      {
+        "label": "School Verification Schema",
+        "path": "api/school/schema"
+      }
+    ]
+  },
+  {
+    "title": "Security",
+    "items": [
+      {
+        "label": "Overview",
+        "path": "security/README"
+      },
+      {
+        "label": "Password Reset",
+        "path": "security/password-reset"
+      },
+      {
+        "label": "Session Management",
+        "path": "security/session-management"
+      },
+      {
+        "label": "Multi-Factor Authentication",
+        "path": "security/mfa"
+      },
+      {
+        "label": "Security Endpoint",
         "path": "api/security"
-      },
-      {
-        "label": "Universities & Faculties",
-        "path": "api/universities"
-      }
-    ]
-  },
-  {
-    "title": "Examples",
-    "items": [
-      {
-        "label": "Node.js",
-        "path": "examples/nodejs"
-      },
-      {
-        "label": "React",
-        "path": "examples/react"
-      },
-      {
-        "label": "Python",
-        "path": "examples/python"
-      }
-    ]
-  },
-  {
-    "title": "FAQ",
-    "items": [
-      {
-        "label": "Common Questions",
-        "path": "faq/common-questions"
       }
     ]
   }

@@ -5,27 +5,27 @@ import { generateUUID } from "../utils/uuid.js";
 export async function insertAcademicRecord(rec: {
   user_id: number | string;
   institution: string;
-  program?: string | null;
+  degree?: string | null;
   matric_number?: string | null;
   start_date?: string | null;
   end_date?: string | null;
-  degree?: string | null;
+  degree_type?: string | null;
   gpa?: string | null;
   meta?: any;
 }) {
   try {
     const id = generateUUID();
     await pool.query(
-      `INSERT INTO academic_records (id, user_id, institution, program, matric_number, start_date, end_date, degree, gpa, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO academic_records (id, user_id, institution, degree, matric_number, start_date, end_date, degree_type, gpa, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         rec.user_id,
         rec.institution,
-        rec.program || null,
+        rec.degree || null,
         rec.matric_number || null,
         rec.start_date || null,
         rec.end_date || null,
-        rec.degree || null,
+        rec.degree_type || null,
         rec.gpa || null,
         rec.meta ? JSON.stringify(rec.meta) : null,
       ],
@@ -34,11 +34,11 @@ export async function insertAcademicRecord(rec: {
       id,
       user_id: rec.user_id as any,
       institution: rec.institution,
-      program: rec.program || null,
+      degree: rec.degree || null,
       matric_number: rec.matric_number || null,
       start_date: rec.start_date || null,
       end_date: rec.end_date || null,
-      degree: rec.degree || null,
+      degree_type: rec.degree_type || null,
       gpa: rec.gpa || null,
       meta: rec.meta || null,
     } as any;
@@ -53,11 +53,11 @@ export async function updateAcademicRecord(id: number | string, updates: any) {
   const values: any[] = [];
   const allowed = [
     "institution",
-    "program",
+    "degree",
     "matric_number",
     "start_date",
     "end_date",
-    "degree",
+    "degree_type",
     "gpa",
     "meta",
   ];
@@ -95,6 +95,19 @@ export async function findAcademicByUser(userId: number | string) {
   } catch (err) {
     console.error(err);
     return [];
+  }
+}
+
+export async function findAcademicById(id: number | string) {
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT * FROM academic_records WHERE id = ?`,
+      [id],
+    );
+    return rows[0] || null;
+  } catch (err) {
+    console.error(err);
+    return null;
   }
 }
 
@@ -165,6 +178,7 @@ export default {
   insertAcademicRecord,
   updateAcademicRecord,
   findAcademicByUser,
+  findAcademicById,
   getStudentByUserId,
   insertTranscript,
   findTranscriptsByAcademic,

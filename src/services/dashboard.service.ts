@@ -202,7 +202,7 @@ export async function getStudentOverview(userId: number | string) {
               matricNumber: student.matric_number,
               department: student.department,
               faculty: student.faculty,
-              program: student.program,
+              degree: student.degree,
               studentLevel: student.student_level,
               admissionYear: student.admission_year,
               graduationYear: student.graduation_year,

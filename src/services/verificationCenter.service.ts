@@ -48,13 +48,13 @@ const STEP_CONFIGS = {
   ],
   academic_info: [
     {
-      step_name: "Program & Level Validation",
+      step_name: "Degree & Level Validation",
       step_order: 1,
       step_type: "automatic" as const,
       requirement_checklist: [
         { requirement: "Institution selected", met: false },
-        { requirement: "Program exists in institution catalog", met: false },
-        { requirement: "Level matches program", met: false },
+        { requirement: "Degree exists in institution catalog", met: false },
+        { requirement: "Level matches degree", met: false },
       ],
     },
     {

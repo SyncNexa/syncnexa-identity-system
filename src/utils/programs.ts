@@ -1,42 +1,11 @@
-// Canonical list of accepted programs (degree types)
-// Client dropdown/search should use this list to avoid free-text input
-const ALLOWED_PROGRAMS = [
-  "b.sc",
-  "b.tech",
-  "b.eng",
-  "b.engr",
-  "b.a",
-  "b.ed",
-  "b.nsc",
-  "llb",
-  "nd",
-  "hnd",
-  "pgd",
-  "m.sc",
-  "m.eng",
-  "mba",
-  "mph",
-  "llm",
-  "phd",
-];
+/**
+ * @deprecated This file has been replaced by degrees.ts
+ * The terminology has been updated from "program" to "degree" throughout the codebase.
+ * Please import from "./degrees.js" instead.
+ */
 
-function normalize(value: string | undefined | null): string | null {
-  return value ? value.trim().toLowerCase() : null;
-}
-
-export function getProgramsForInstitution(_code: string): string[] {
-  // Currently program validation is global (degree types), not per institution
-  return ALLOWED_PROGRAMS;
-}
-
-export function isValidProgramForInstitution(
-  institutionCode: string,
-  program: string,
-): boolean {
-  const normalizedProgram = normalize(program);
-  if (!normalizedProgram) return false;
-
-  return getProgramsForInstitution(institutionCode).some(
-    (p) => normalize(p) === normalizedProgram,
-  );
-}
+// Re-export from degrees.ts for backward compatibility
+export {
+  getDegreesForInstitution as getProgramsForInstitution,
+  isValidDegreeForInstitution as isValidProgramForInstitution,
+} from "./degrees.js";

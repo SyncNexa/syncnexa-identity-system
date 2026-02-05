@@ -124,9 +124,17 @@ export async function updatePersonalInfo(req: Request, res: Response) {
     const userId = req.user?.id;
     if (!userId) return sendError(400, "user_id required", res);
 
+    const ipAddress =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0] ||
+      req.socket.remoteAddress ||
+      undefined;
+    const userAgent = req.headers["user-agent"];
+
     const result = await studentService.updatePersonalInfo(
       userId as string,
       req.body,
+      ipAddress,
+      userAgent,
     );
     if (!result || !result.data)
       return sendError(404, "Personal information not found", res);

@@ -952,3 +952,144 @@ This is an automated security alert. Please do not reply to this email.
     text,
   });
 }
+
+/**
+ * Send email change alert to old email
+ */
+export async function sendEmailChangeAlertEmail(
+  oldEmail: string,
+  newEmail: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<boolean> {
+  const timestamp = new Date().toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  });
+
+  const logo = getLogoHtml();
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; }
+          .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
+          .logo-img { max-width: 150px; margin-bottom: 10px; }
+          .alert { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+          .content { background-color: white; padding: 20px; border-radius: 4px; margin-bottom: 20px; }
+          .details { background-color: #f5f5f5; padding: 15px; border-radius: 4px; margin: 15px 0; font-size: 14px; }
+          .detail-row { margin: 8px 0; }
+          .detail-label { font-weight: bold; color: #555; }
+          .warning { color: #d32f2f; font-weight: bold; }
+          .action-section { background-color: #e8f5e9; padding: 15px; border-radius: 4px; margin: 15px 0; border-left: 4px solid #4caf50; }
+          .button { display: inline-block; background-color: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin: 10px 0; }
+          .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e0e0e0; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            ${logo}
+            <h2>⚠️ EMAIL ADDRESS CHANGED</h2>
+          </div>
+
+          <div class="alert">
+            <p><strong>IMPORTANT SECURITY ALERT</strong></p>
+            <p>The email address associated with your SyncNexa account has been changed.</p>
+          </div>
+
+          <div class="content">
+            <p>Hello,</p>
+            <p>We're sending this alert to your old email address (${oldEmail}) to inform you that the email address on your SyncNexa account has been changed.</p>
+
+            <p><strong>NEW EMAIL ADDRESS:</strong></p>
+            <p style="font-size: 18px; color: #1976d2; font-weight: bold;">${newEmail}</p>
+
+            <div class="details">
+              <p style="margin-top: 0;"><strong>CHANGE DETAILS:</strong></p>
+              <div class="detail-row">
+                <span class="detail-label">Changed At:</span> ${timestamp}
+              </div>
+              ${ipAddress ? `<div class="detail-row"><span class="detail-label">IP Address:</span> ${ipAddress}</div>` : ""}
+              ${userAgent ? `<div class="detail-row"><span class="detail-label">Device:</span> ${userAgent}</div>` : ""}
+            </div>
+
+            <div class="action-section">
+              <p><strong>✓ IF THIS WAS YOU:</strong></p>
+              <p>No action needed. Your email address has been successfully updated. An OTP verification link has been sent to your new email address (${newEmail}). Please verify it to complete the process.</p>
+            </div>
+
+            <div class="action-section" style="background-color: #ffebee; border-left-color: #d32f2f;">
+              <p><strong class="warning">⚠️ IF THIS WASN'T YOU:</strong></p>
+              <p>Your account may have been compromised. Take immediate action:</p>
+              <ul>
+                <li>Reset your password immediately</li>
+                <li>Enable two-factor authentication (2FA)</li>
+                <li>Review your account activity and connected devices</li>
+                <li>Contact our security team for assistance</li>
+              </ul>
+              <a href="https://app.syncnexa.io/security" class="button" style="background-color: #d32f2f;">View Account Security</a>
+            </div>
+
+            <p><strong>IMPORTANT:</strong> All active sessions have been terminated as a security measure. You will need to log in again with your credentials.</p>
+          </div>
+
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} SyncNexa. All rights reserved.</p>
+            <p>This is an automated security alert. Please do not reply to this email.</p>
+            <p>If you did not request this change, please secure your account immediately by contacting our support team.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+SyncNexa - Email Address Changed Alert
+
+⚠️ SECURITY ALERT
+
+The email address associated with your SyncNexa account has been changed.
+
+NEW EMAIL ADDRESS: ${newEmail}
+
+CHANGE DETAILS:
+- Changed At: ${timestamp}
+${ipAddress ? `- IP Address: ${ipAddress}` : ""}
+${userAgent ? `- Device: ${userAgent}` : ""}
+
+IF THIS WAS YOU:
+No action needed. Your email address has been successfully updated. An OTP verification link has been sent to your new email address. Please verify it to complete the process.
+
+IF THIS WASN'T YOU:
+Your account may have been compromised. Take immediate action:
+- Reset your password immediately
+- Enable two-factor authentication (2FA)
+- Review your account activity
+- Contact our support team
+
+IMPORTANT: All active sessions have been terminated as a security measure. You will need to log in again.
+
+© ${new Date().getFullYear()} SyncNexa. All rights reserved.
+This is an automated security alert. Please do not reply to this email.
+  `;
+
+  return sendEmail({
+    to: oldEmail,
+    subject:
+      "⚠️ Security Alert: Email Address Changed on Your SyncNexa Account",
+    html,
+    text,
+  });
+}

@@ -2,6 +2,7 @@ import studentDocModel from "../models/studentDocument.model.js";
 import * as userModel from "../models/user.model.js";
 import * as emailVerificationService from "./emailVerification.service.js";
 import * as sessionModel from "../models/session.model.js";
+import { sendEmailChangeAlertEmail } from "../utils/email.js";
 
 export async function uploadIdentityDocument(payload: any) {
   // payload: { user_id, doc_type, filename, filepath, mime_type, file_size, meta }
@@ -96,6 +97,8 @@ export async function updatePersonalInfo(
     address?: string;
     gender?: string;
   },
+  ipAddress?: string,
+  userAgent?: string,
 ): Promise<{ data: PersonalInfo; emailVerificationRequired?: boolean }> {
   try {
     // Get current user data first to check if email actually changed
@@ -124,6 +127,14 @@ export async function updatePersonalInfo(
 
     // If email was actually changed to a different one, handle verification reset, logging, and session termination
     if (emailChanged) {
+      // Send alert email to old email address
+      await sendEmailChangeAlertEmail(
+        currentUser.email,
+        payload.email!,
+        ipAddress,
+        userAgent,
+      );
+
       // Log the email change for audit trail
       await userModel.logEmailChange(userId, currentUser.email, payload.email!);
 

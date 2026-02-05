@@ -2,6 +2,16 @@
 
 Update the personal information of the authenticated student. You can update fields individually or in combination.
 
+## Important: Email Changes
+
+When you change your email address:
+
+- All active sessions are terminated (forced logout)
+- An OTP is sent to your new email for verification
+- Email status is reset to pending
+- Email change is logged for audit trail and conflict resolution
+- You must verify the new email to re-enable email functionality
+
 ## Endpoint
 
 ```
@@ -105,6 +115,8 @@ When email is updated, the response is 202 Accepted:
 - `emailStatus` is automatically reset to `"pending"`
 - An OTP is generated and sent to the new email address
 - Previous verification tokens are revoked
+- **All active sessions are terminated** (user is logged out from all devices)
+- Email change is recorded in the audit log for security and conflict resolution
 - Client should redirect user to email verification page
 - The 202 status code indicates email verification is needed
 
@@ -595,6 +607,32 @@ The email is technically updated but not fully verified until the OTP is confirm
 4. **Confirmation**: Consider confirming significant changes with user
 5. **Privacy**: Don't log or display sensitive updates unnecessarily
 6. **Batch Updates**: Combine multiple field updates in one request
+7. **Session Termination**: Be aware that email changes will logout the user from all devices
+8. **Email Verification**: After email change, user must verify new email before accessing services
+
+## Security & Audit Trail
+
+All email address changes are logged in the audit trail for:
+
+- **Conflict Resolution**: Track all email changes to resolve disputes
+- **Security**: Detect unauthorized account takeover attempts
+- **Compliance**: Maintain records for audit and regulatory requirements
+- **Change History**: Count frequency of email changes per account
+
+**What Gets Logged:**
+
+- Unique change ID (UUID)
+- User ID
+- Old email address
+- New email address
+- Timestamp of change
+
+**Session Termination:**
+When email is changed, all active sessions are immediately revoked to prevent unauthorized access. User must:
+
+1. Verify the new email with OTP
+2. Re-authenticate with their credentials
+3. New sessions will be created on re-login
 
 ## Troubleshooting
 

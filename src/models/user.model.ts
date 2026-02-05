@@ -335,3 +335,35 @@ export async function resetEmailVerificationStatus(
   );
   return (result as any).affectedRows > 0;
 }
+
+export async function logEmailChange(
+  userId: string,
+  oldEmail: string,
+  newEmail: string,
+): Promise<boolean> {
+  try {
+    const changeId = generateUUID();
+    const [result] = await pool.query(
+      `INSERT INTO email_change_logs (id, user_id, old_email, new_email)
+       VALUES (?, ?, ?, ?)`,
+      [changeId, userId, oldEmail, newEmail],
+    );
+    return (result as any).affectedRows > 0;
+  } catch (err) {
+    console.error("Error logging email change:", err);
+    throw err;
+  }
+}
+
+export async function getEmailChangeCount(userId: string): Promise<number> {
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT COUNT(*) as count FROM email_change_logs WHERE user_id = ?`,
+      [userId],
+    );
+    return rows[0]?.count || 0;
+  } catch (err) {
+    console.error("Error getting email change count:", err);
+    throw err;
+  }
+}

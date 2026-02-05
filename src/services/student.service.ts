@@ -1,6 +1,7 @@
 import studentDocModel from "../models/studentDocument.model.js";
 import * as userModel from "../models/user.model.js";
 import * as emailVerificationService from "./emailVerification.service.js";
+import * as sessionModel from "../models/session.model.js";
 
 export async function uploadIdentityDocument(payload: any) {
   // payload: { user_id, doc_type, filename, filepath, mime_type, file_size, meta }
@@ -121,13 +122,19 @@ export async function updatePersonalInfo(
       throw new Error("Failed to update personal information");
     }
 
-    // If email was actually changed to a different one, handle verification reset and OTP
+    // If email was actually changed to a different one, handle verification reset, logging, and session termination
     if (emailChanged) {
+      // Log the email change for audit trail
+      await userModel.logEmailChange(userId, currentUser.email, payload.email!);
+
       // Reset email verification status to pending
       await userModel.resetEmailVerificationStatus(userId);
 
       // Revoke existing verification tokens
       await emailVerificationService.revokeEmailVerificationTokens(userId);
+
+      // Revoke all active sessions to force re-login
+      await sessionModel.revokeAllUserSessions(userId);
 
       // Create and send new OTP to the new email
       await emailVerificationService.createAndSendEmailVerificationOTP(userId);

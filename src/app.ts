@@ -12,6 +12,7 @@ import userRoutes from "./routes/user.route.js";
 import appsRoutes from "./routes/apps.route.js";
 import sauthRoutes from "./routes/sauth.route.js";
 import securityRoutes from "./routes/security.route.js";
+import { logger } from "./utils/logger.js";
 import { markdownToHtml, getDocPath } from "./utils/docsServer.js";
 import { initializeVerificationForExistingStudents } from "./services/verificationInitializer.service.js";
 
@@ -73,10 +74,10 @@ app.use(errorHandler);
 
 // Initialize verification pillars for existing students (non-blocking)
 initializeVerificationForExistingStudents().catch((err) => {
-  console.error(
-    "[VERIFICATION] Failed to initialize verification on startup:",
-    err,
-  );
+  logger.error("verification_initialization_failed", {
+    message: err instanceof Error ? err.message : "Unknown error",
+    stack: err instanceof Error ? err.stack : undefined,
+  });
 });
 
 export default app;

@@ -1,16 +1,7 @@
 import morgan from "morgan";
-import chalk from "chalk";
 import geoip from "geoip-lite";
 import type { Request, Response } from "express";
 import { logger } from "../utils/logger.js";
-
-const colorizeStatus = (status: number) => {
-  if (status >= 500) return chalk.red(status);
-  if (status >= 400) return chalk.yellow(status);
-  if (status >= 300) return chalk.cyan(status);
-  if (status >= 200) return chalk.green(status);
-  return chalk.white(status);
-};
 
 export const requestLogger = morgan<Request, Response>(
   (tokens, req, res): string => {
@@ -20,8 +11,8 @@ export const requestLogger = morgan<Request, Response>(
       (Array.isArray(forwarded)
         ? forwarded[0]
         : typeof forwarded === "string"
-        ? forwarded.split(",")[0]
-        : req.ip) || "unknown";
+          ? forwarded.split(",")[0]
+          : req.ip) || "unknown";
 
     // Geo lookup
     const location = geoip.lookup(ip);
@@ -34,33 +25,42 @@ export const requestLogger = morgan<Request, Response>(
     // ✅ Safe token getters
     const get = <T>(
       fn: ((req: Request, res: Response) => T) | undefined,
-      fallback: T
+      fallback: T,
     ): T => (typeof fn === "function" ? fn(req, res) : fallback);
 
     const method = get(tokens.method, "UNKNOWN");
     const url = get(tokens.url, "UNKNOWN");
     const status = Number(get(tokens.status, "0"));
 
-    const responseTime = get(tokens["response-time"], "0");
-
-    // 🎨 Rich colored console log
-    const output = [
-      chalk.gray(get(tokens.date, new Date().toISOString())),
-      chalk.blue(method),
-      chalk.white(url),
-      colorizeStatus(status),
-      chalk.magenta(`${responseTime} ms`),
-      chalk.yellow(`IP: ${ip}`),
-      chalk.cyan(`(${geo})`),
-    ].join(" ");
-
-    console.log(output);
-
-    // 🗂 Structured log file
-    logger.info(
-      `${method} ${url} ${status} ${responseTime}ms - IP: ${ip} - Location: ${geo}`
+    const responseTime = Number(get(tokens["response-time"], "0"));
+    const contentLength = Number(
+      tokens.res?.(req, res, "content-length") || "0",
     );
+    const requestIdHeader =
+      req.headers["x-request-id"] || req.headers["x-correlation-id"];
+    const requestId = Array.isArray(requestIdHeader)
+      ? requestIdHeader[0]
+      : requestIdHeader || null;
+
+    logger.info("HTTP request", {
+      method,
+      url,
+      status,
+      responseTimeMs: responseTime,
+      ip,
+      geo,
+      userAgent: req.headers["user-agent"] || "unknown",
+      contentLength,
+      requestId,
+    });
 
     return "";
-  }
+  },
+  {
+    stream: {
+      write: () => {
+        // Intentionally no-op. Structured logs are emitted via logger.info above.
+      },
+    },
+  },
 );

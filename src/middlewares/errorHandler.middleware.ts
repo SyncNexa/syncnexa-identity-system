@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from "express";
-import chalk from "chalk";
 import { logger } from "../utils/logger.js";
 import { sendError } from "../utils/error.js";
 import { DuplicateEmailError } from "../models/user.model.js";
@@ -36,21 +35,18 @@ export function errorHandler(
 
   const route = `${req.method} ${req.originalUrl}`;
   const message = err.message || "Unknown error";
-  const stack = err.stack || "No stack trace";
 
-  console.error(
-    [
-      chalk.red.bold("🔥 SERVER ERROR 🔥"),
-      chalk.redBright(`Route: ${route}`),
-      chalk.yellow(`IP: ${ip}`),
-      chalk.red(`Message: ${message}`),
-      chalk.gray(stack),
-      "\n",
-    ].join("\n"),
-  );
-
-  // 📝 File log for production / audits
-  logger.error(`Error from ${route} - IP: ${ip} - ${message}\n${stack}`);
+  logger.error("Unhandled application error", {
+    route,
+    ip,
+    message,
+    stack: err.stack,
+    method: req.method,
+    path: req.originalUrl,
+    userAgent: req.headers["user-agent"] || "unknown",
+    requestId:
+      req.headers["x-request-id"] || req.headers["x-correlation-id"] || null,
+  });
 
   // Handle specific error types
   if (err instanceof DuplicateEmailError) {
